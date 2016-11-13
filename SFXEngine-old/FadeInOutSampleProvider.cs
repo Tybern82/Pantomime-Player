@@ -24,10 +24,15 @@ namespace SFXEngine {
             this.fadeState = FadeState.FullVolume;
         }
 
-        public FadeInOutSampleProvider(ISampleProvider source, TimeSpan autoFadeOut, TimeSpan fadeDuration) : this(source) {
+        public FadeInOutSampleProvider(ISampleProvider source, TimeSpan autoFadeOutTime, TimeSpan autoFadeOutDuration) : this(source) {
             int samplesPerSecond = source.WaveFormat.SampleRate * source.WaveFormat.Channels;
-            this.autoFadeOutSample = (long)Math.Round(autoFadeOut.TotalSeconds * samplesPerSecond, MidpointRounding.AwayFromZero);
-            this.autoFadeDuration = fadeDuration.TotalMilliseconds;
+            this.autoFadeOutSample = (long)Math.Round(autoFadeOutTime.TotalSeconds * samplesPerSecond, MidpointRounding.AwayFromZero);
+            this.autoFadeDuration = autoFadeOutDuration.TotalMilliseconds;
+        }
+
+        public FadeInOutSampleProvider(ISampleProvider source, TimeSpan autoFadeInDuration, TimeSpan autoFadeOutTime, TimeSpan autoFadeOutDuration) :
+            this(source, autoFadeOutTime, autoFadeOutDuration) {
+            BeginFadeIn(autoFadeInDuration.TotalMilliseconds);
         }
 
         public void BeginFadeIn(double fadeDurationInMilliseconds) {

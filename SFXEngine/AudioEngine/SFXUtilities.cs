@@ -2,75 +2,20 @@
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 
-namespace SFXEngine {
-    public class AudioPlaybackEngine : PlaybackDevice, IDisposable {
+using SFXEngine.AudioEngine.Adapters;
 
-        public static AudioPlaybackEngine Instance = new AudioPlaybackEngine(DefaultSampleRate, DefaultChannelCount);
+namespace SFXEngine.AudioEngine {
+    public class SFXUtilities {
 
-        public const UInt16 DefaultSampleRate = 44100;
-        public const UInt16 DefaultChannelCount = 2;
-
-        public UInt16 AudioSampleRate { get; private set; }
-        public UInt16 AudioChannelCount { get; private set; }
-        
-        private readonly IWavePlayer outputDevice;
-        private readonly MixingSampleProvider mixer;
-
-        public AudioPlaybackEngine(UInt16 sampleRate, UInt16 channels) {
-            this.AudioSampleRate = sampleRate;
-            this.AudioChannelCount = channels;
-            switch (channels) {
-                case 1:
-                case 2:
-                case 6:
-                case 8:
-                    break;
-                default:
-                    throw new NotImplementedException("Only able to support mono, stereo, 5.1 and 7.1 channel outputs.");
-            }
-            outputDevice = new WaveOutEvent();
-            mixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(AudioSampleRate, AudioChannelCount));
-            mixer.ReadFully = true;
-            outputDevice.Init(mixer);
-            outputDevice.Play();
-        }
-
-        public void Stop() {
-            mixer.RemoveAllMixerInputs();
-        }
-
-        public void Stop(ISampleProvider snd) {
-            mixer.RemoveMixerInput(snd);
-        }
-
-        public bool Play(Effect cue) {
-            if (cue is SoundFX) {
-                return Play((SoundFX)cue);
-            } else {
-                return false;
-            }
-        }
-
-        public bool Play(SoundFX cue) {
-            return Play(cue.toSampleProvider());
-        }
-
-        public bool Play(ISampleProvider snd) {
-            try {
-                // Resample input, if required
-                if (snd.WaveFormat.SampleRate != AudioSampleRate) snd = new WdlResamplingSampleProvider(snd, AudioSampleRate);
-                // Then adjust the channel outputs
-                if (snd.WaveFormat.Channels != AudioChannelCount) snd = AdjustChannelCount(snd, AudioChannelCount);
-                // Finally begin playing
-                mixer.AddMixerInput(snd);
-                return true;
-            } catch (NotImplementedException) {
-                return false;
-            }
+        public static TimeSpan TimeInSeconds(int seconds) {
+            return new TimeSpan(0, 0, seconds);
         }
 
         public static ISampleProvider AdjustChannelCount(ISampleProvider snd, UInt16 AudioChannelCount) {
-            if (AudioChannelCount == 2) {
+            if (AudioChannelCount == 1) {
+                if (snd.WaveFormat.Channels == 1) return snd;
+                return new MultiChannelToMonoSampleProvider(snd);
+            } else if (AudioChannelCount == 2) {
                 if (snd.WaveFormat.Channels == 2) return snd;
                 if (snd.WaveFormat.Channels == 1) return new MonoToStereoSampleProvider(snd);
                 var sInput = new MultiplexingSampleProvider(new ISampleProvider[] { snd }, 2);
@@ -98,24 +43,13 @@ namespace SFXEngine {
                     sInput.ConnectInputToOutput(5, 1);  // REAR-RIGHT
                     sInput.ConnectInputToOutput(6, 0);  // SIDE-LEFT
                     sInput.ConnectInputToOutput(7, 1);  // SIDE-RIGHT
-                } else throw new NotImplementedException("Unsupported channel count detected...");
+                } else throw new UnsupportedAudioException("Unable to convert audio file channels for output.");
                 return sInput;
-            } else if (AudioChannelCount == 1) {
-                if (snd.WaveFormat.Channels == 1)
-                    return snd;
-                else
-                    return new MultiChannelToMonoSampleProvider(snd);
             } else if (AudioChannelCount == 6) {
-                var sInput = new MultiplexingSampleProvider(new ISampleProvider[] { snd }, 6);
                 if (snd.WaveFormat.Channels == 6) return snd;
-                else if (snd.WaveFormat.Channels == 1) {
-                    sInput.ConnectInputToOutput(0, 0);
-                    sInput.ConnectInputToOutput(0, 1);
-                    sInput.ConnectInputToOutput(0, 2);
-                    sInput.ConnectInputToOutput(0, 3);
-                    sInput.ConnectInputToOutput(0, 4);
-                    sInput.ConnectInputToOutput(0, 5);
-                } else if (snd.WaveFormat.Channels == 8) {
+                if (snd.WaveFormat.Channels == 1) return new MonoToMultiChannelSampleProvider(snd, 6);
+                var sInput = new MultiplexingSampleProvider(new ISampleProvider[] { snd }, 6);
+                if (snd.WaveFormat.Channels == 8) {
                     sInput.ConnectInputToOutput(0, 0);
                     sInput.ConnectInputToOutput(1, 1);
                     sInput.ConnectInputToOutput(2, 2);
@@ -133,21 +67,13 @@ namespace SFXEngine {
                     sInput.ConnectInputToOutput(1, 3);
                     sInput.ConnectInputToOutput(0, 4);
                     sInput.ConnectInputToOutput(1, 5);
-                } else throw new NotImplementedException("Unsupported channel count detected...");
+                } else throw new UnsupportedAudioException("Unable to convert audio file channels for output.");
                 return sInput;
             } else if (AudioChannelCount == 8) {
-                var sInput = new MultiplexingSampleProvider(new ISampleProvider[] { snd }, 8);
                 if (snd.WaveFormat.Channels == 8) return snd;
-                else if (snd.WaveFormat.Channels == 1) {
-                    sInput.ConnectInputToOutput(0, 0);
-                    sInput.ConnectInputToOutput(0, 1);
-                    sInput.ConnectInputToOutput(0, 2);
-                    sInput.ConnectInputToOutput(0, 3);
-                    sInput.ConnectInputToOutput(0, 4);
-                    sInput.ConnectInputToOutput(0, 5);
-                    sInput.ConnectInputToOutput(0, 6);
-                    sInput.ConnectInputToOutput(0, 7);
-                } else if (snd.WaveFormat.Channels == 6) {
+                if (snd.WaveFormat.Channels == 1) return new MonoToMultiChannelSampleProvider(snd, 8);
+                var sInput = new MultiplexingSampleProvider(new ISampleProvider[] { snd }, 8);
+                if (snd.WaveFormat.Channels == 6) {
                     sInput.ConnectInputToOutput(0, 0);
                     sInput.ConnectInputToOutput(1, 1);
                     sInput.ConnectInputToOutput(2, 2);
@@ -167,15 +93,9 @@ namespace SFXEngine {
                     sInput.ConnectInputToOutput(1, 5);
                     sInput.ConnectInputToOutput(0, 6);
                     sInput.ConnectInputToOutput(0, 7);
-                } else throw new NotImplementedException("Unsupported channel count detected...");
+                } else throw new UnsupportedAudioException("Unable to convert audio file channels for output.");
                 return sInput;
-            } else {
-                throw new NotImplementedException("Unsupported channel count detected...");
-            }
-        }
-
-        public void Dispose() {
-            outputDevice.Dispose();
+            } else throw new UnsupportedAudioException("Unable to convert audio file channels for output.");
         }
     }
 }

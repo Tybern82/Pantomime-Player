@@ -23,5 +23,8 @@ namespace SFXEngine {
         Effect dup();
 
         bool play(PlaybackDevice dev);
+
+        EventRegister onStart { get; }
+        EventRegister onStop { get; }
     }
 }

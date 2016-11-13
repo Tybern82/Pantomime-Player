@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFXEngine", "SFXEngine.csproj", "{7BA8D13D-318B-4B05-BE45-7A01EBA64247}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioPlaybackEngine", "..\SFX-AudioTest\AudioPlaybackEngine\AudioPlaybackEngine.csproj", "{9159773E-791F-49B0-8E36-9CEFE49CC737}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFXEngine-Test", "..\SFXEngine-Test\SFXEngine-Test.csproj", "{DA6911D6-2CB9-4B71-BE09-29CC8A94E0CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{7BA8D13D-318B-4B05-BE45-7A01EBA64247}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BA8D13D-318B-4B05-BE45-7A01EBA64247}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7BA8D13D-318B-4B05-BE45-7A01EBA64247}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9159773E-791F-49B0-8E36-9CEFE49CC737}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9159773E-791F-49B0-8E36-9CEFE49CC737}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9159773E-791F-49B0-8E36-9CEFE49CC737}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9159773E-791F-49B0-8E36-9CEFE49CC737}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA6911D6-2CB9-4B71-BE09-29CC8A94E0CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA6911D6-2CB9-4B71-BE09-29CC8A94E0CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA6911D6-2CB9-4B71-BE09-29CC8A94E0CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA6911D6-2CB9-4B71-BE09-29CC8A94E0CD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

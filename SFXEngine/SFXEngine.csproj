@@ -30,9 +30,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="NAudio, Version=1.7.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\NAudio.1.7.3\lib\net35\NAudio.dll</HintPath>
       <Private>True</Private>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="NAudio.Flac, Version=1.0.5702.29018, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\NAudio.Flac.1.0.5702.29018\lib\net45\NAudio.Flac.dll</HintPath>
@@ -64,17 +69,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AudioPlaybackEngine.cs" />
-    <Compile Include="AutoDisposeFileReader.cs" />
-    <Compile Include="CachedSound.cs" />
-    <Compile Include="Effect.cs" />
-    <Compile Include="FadeInOutSampleProvider.cs" />
-    <Compile Include="MultiChannelToMonoSampleProvider.cs" />
-    <Compile Include="PlaybackDevice.cs" />
+    <Compile Include="AudioEngine\Adapters\FadeSampleProvider.cs" />
+    <Compile Include="AudioEngine\Adapters\MonoToMultiChannelSampleProvider.cs" />
+    <Compile Include="AudioEngine\Adapters\MultiChannelToMonoSampleProvider.cs" />
+    <Compile Include="AudioEngine\Announcements.cs" />
+    <Compile Include="AudioEngine\AudioPlaybackEngine.cs" />
+    <Compile Include="AudioEngine\Effects\BufferedSoundFX.cs" />
+    <Compile Include="AudioEngine\Effects\CachedSoundFX.cs" />
+    <Compile Include="AudioEngine\Effects\MP3SoundFile.cs" />
+    <Compile Include="AudioEngine\Effects\SoundFile.cs" />
+    <Compile Include="AudioEngine\SoundFX.cs" />
+    <Compile Include="AudioEngine\StandardAnnouncements.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>StandardAnnouncements.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Events\SoundEventRegister.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SFXEngineProperties.cs" />
-    <Compile Include="SoundFile.cs" />
-    <Compile Include="SoundFX.cs" />
+    <Compile Include="AudioEngine\SFXEngineProperties.cs" />
+    <Compile Include="AudioEngine\SFXUtilities.cs" />
+    <Compile Include="AudioEngine\UnsupportedAudioException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -86,6 +100,30 @@
     <Content Include="libmp3lame.64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Resources\Preshow - Show Beginning.mp3" />
+    <None Include="Resources\Preshow - 35 Minute Interval.mp3" />
+    <None Include="Resources\Preshow - 30 Minute Interval.mp3" />
+    <None Include="Resources\Preshow - 25 Minute Interval.mp3" />
+    <None Include="Resources\Preshow - 20 Minute Interval.mp3" />
+    <None Include="Resources\Preshow - 15 Minute Interval.mp3" />
+    <None Include="Resources\Preshow - 10 Minute Warning.mp3" />
+    <None Include="Resources\Preshow - 10 Minute Interval.mp3" />
+    <None Include="Resources\Preshow - 5 Minute Warning.mp3" />
+    <None Include="Resources\Notice - Agatha Christie.mp3" />
+    <None Include="Resources\Interval - 35 Minute.mp3" />
+    <None Include="Resources\Interval - 30 Minute.mp3" />
+    <None Include="Resources\Interval - 25 Minute.mp3" />
+    <None Include="Resources\Interval - 20 Minute.mp3" />
+    <None Include="Resources\Interval - 15 Minute.mp3" />
+    <None Include="Resources\Interval - 10 Minute.mp3" />
+    <None Include="Resources\Interval - 5 Minute Warning.mp3" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="AudioEngine\StandardAnnouncements.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>StandardAnnouncements.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
