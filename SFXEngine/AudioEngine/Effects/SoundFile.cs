@@ -11,7 +11,8 @@ namespace SFXEngine.AudioEngine.Effects {
 
         private AudioFileReader source;
         private ISampleProvider readerSample;
-        private string filename;
+
+        public string filename { get; private set; }
 
         public override WaveFormat WaveFormat {
             get {
@@ -41,7 +42,9 @@ namespace SFXEngine.AudioEngine.Effects {
 
         public override SoundFX dup() {
             if (canDuplicate) {
-                return new SoundFile(filename);
+                SoundFile _result = new SoundFile(filename);
+                _result.source.CurrentTime = this.currentTime;
+                return _result;
             } else {
                 return null;
             }
@@ -84,6 +87,7 @@ namespace SFXEngine.AudioEngine.Effects {
                 }
                 int _result = readerSample.Read(buffer, offset, count);
                 if (_result == 0) stop();
+                else onSample.triggerEvent(this);
                 return _result;
             }
         }

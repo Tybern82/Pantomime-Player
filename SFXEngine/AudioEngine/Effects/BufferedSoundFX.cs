@@ -31,6 +31,12 @@ namespace SFXEngine.AudioEngine.Effects {
             }
         }
 
+        public override Boolean isCachable {
+            get {
+                return false;
+            }
+        }
+
         public override Int64 currentSample {
             get {
                 return totalPosition;
@@ -102,9 +108,26 @@ namespace SFXEngine.AudioEngine.Effects {
         }
 
         public override SoundFX dup() {
-            if ((canDuplicate) && (source is SoundFX)) {
-                SoundFX fx = ((SoundFX)source).dup();
-                if (fx != null) return new BufferedSoundFX(fx);
+            lock (mainBuffer_lock) {
+                lock (secondaryBuffer_lock) {
+                    if ((canDuplicate) && (source is SoundFX)) {
+                        SoundFX fx = ((SoundFX)source).dup();
+                        if (fx != null) {
+                            BufferedSoundFX _result = new BufferedSoundFX(fx);
+                            if (this.mainBuffer != null) {
+                                _result.mainBuffer = new float[this.mainBuffer.Count()];
+                                this.mainBuffer.CopyTo(_result.mainBuffer, 0);
+                            }
+                            if (this.secondaryBuffer != null) {
+                                _result.secondaryBuffer = new float[this.secondaryBuffer.Count()];
+                                this.secondaryBuffer.CopyTo(_result.secondaryBuffer, 0);
+                            }
+                            _result.totalPosition = this.totalPosition;
+                            _result.position = this.position;
+                            return _result;
+                        }
+                    }
+                }
             }
             return null;
         }
@@ -180,6 +203,8 @@ namespace SFXEngine.AudioEngine.Effects {
                         totalPosition += samplesToCopy;
                         samplesCopied += samplesToCopy;
                     }
+                    if (samplesCopied == 0) stop();
+                    else onSample.triggerEvent(this);
                     return samplesCopied;
                 }
             }

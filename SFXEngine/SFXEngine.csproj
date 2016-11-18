@@ -77,7 +77,10 @@
     <Compile Include="AudioEngine\Effects\BufferedSoundFX.cs" />
     <Compile Include="AudioEngine\Effects\CachedSoundFX.cs" />
     <Compile Include="AudioEngine\Effects\MP3SoundFile.cs" />
+    <Compile Include="AudioEngine\Effects\Silence.cs" />
     <Compile Include="AudioEngine\Effects\SoundFile.cs" />
+    <Compile Include="AudioEngine\Groups\SoundFXCollection.cs" />
+    <Compile Include="AudioEngine\Groups\SoundFXSequence.cs" />
     <Compile Include="AudioEngine\SoundFX.cs" />
     <Compile Include="AudioEngine\StandardAnnouncements.Designer.cs">
       <AutoGen>True</AutoGen>

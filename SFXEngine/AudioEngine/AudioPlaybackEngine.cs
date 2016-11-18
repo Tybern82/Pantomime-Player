@@ -13,6 +13,8 @@ namespace SFXEngine.AudioEngine {
         public UInt16 AudioSampleRate { get; private set; }
         public UInt16 AudioChannelCount { get; private set; }
 
+        public WaveFormat WaveFormat { get { return mixer.WaveFormat; } }
+
         private readonly IWavePlayer outputDevice;
         private readonly MixingSampleProvider mixer;
 
@@ -47,11 +49,7 @@ namespace SFXEngine.AudioEngine {
 
         public ISampleProvider play(ISampleProvider source) {
             try {
-                // resample, if required
-                if (source.WaveFormat.SampleRate != AudioSampleRate) source = new WdlResamplingSampleProvider(source, AudioSampleRate);
-                // adjust channel count, if required
-                if (source.WaveFormat.Channels != AudioChannelCount) source = SFXUtilities.AdjustChannelCount(source, AudioChannelCount);
-                // begin playing
+                source = SFXUtilities.ConvertSampleFormat(source, mixer.WaveFormat);
                 mixer.AddMixerInput(source);
                 return source;
             } catch (UnsupportedAudioException) {

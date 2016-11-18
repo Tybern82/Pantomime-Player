@@ -21,6 +21,7 @@ namespace SFXEngine.AudioEngine {
 
         public SoundEventRegister onPlay { get; } = new SoundEventRegister();
         public SoundEventRegister onStop { get; } = new SoundEventRegister();
+        public SoundEventRegister onSample { get; } = new SoundEventRegister();
 
         public SoundEventRegister onPause { get; } = new SoundEventRegister();
         public SoundEventRegister onResume { get; } = new SoundEventRegister();
@@ -38,11 +39,17 @@ namespace SFXEngine.AudioEngine {
             }
         }
 
+        public virtual bool isCachable {
+            get {
+                bool _isCachable = (length.TotalSeconds * WaveFormat.SampleRate * WaveFormat.Channels) <= SFXEngineProperties.MaxCachedSoundSize;
+                _isCachable |= (length - currentTime) <= SFXEngineProperties.MaxCachedSoundFile;
+                return _isCachable;
+            }
+        }
+
         protected object _play_lock = new object();
 
         public virtual SoundFX cache() {
-            bool isCachable = (length.TotalSeconds * WaveFormat.SampleRate * WaveFormat.Channels) <= SFXEngineProperties.MaxCachedSoundSize;
-            isCachable |= (length - currentTime) <= SFXEngineProperties.MaxCachedSoundFile;
             if (isCachable) {
                 var currPosition = currentTime;
                 try {
@@ -79,7 +86,8 @@ namespace SFXEngine.AudioEngine {
         }
 
         public virtual bool seekTo(TimeSpan index) {
-            return false;
+            long sampleIndex = (long)Math.Round((index.TotalSeconds * WaveFormat.SampleRate * WaveFormat.Channels), MidpointRounding.ToEven);
+            return seekTo(sampleIndex);
         }
 
         public virtual bool seekTo(long sampleIndex) {

@@ -42,7 +42,9 @@ namespace SFXEngine.AudioEngine.Effects {
 
         public override SoundFX dup() {
             if (canDuplicate) {
-                return new MP3SoundFile(mp3Data);
+                MP3SoundFile _result = new MP3SoundFile(mp3Data);
+                _result.source.CurrentTime = this.currentTime;
+                return _result;
             } else {
                 return null;
             }
@@ -85,6 +87,7 @@ namespace SFXEngine.AudioEngine.Effects {
                 }
                 int _result = readerSample.Read(buffer, offset, count);
                 if (_result == 0) stop();
+                else onSample.triggerEvent(this);
                 return _result;
             }
         }

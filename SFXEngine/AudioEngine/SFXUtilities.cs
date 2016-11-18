@@ -3,6 +3,7 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 
 using SFXEngine.AudioEngine.Adapters;
+using SFXEngine.AudioEngine.Effects;
 
 namespace SFXEngine.AudioEngine {
     public class SFXUtilities {
@@ -11,7 +12,27 @@ namespace SFXEngine.AudioEngine {
             return new TimeSpan(0, 0, seconds);
         }
 
-        public static ISampleProvider AdjustChannelCount(ISampleProvider snd, UInt16 AudioChannelCount) {
+        public static Silence GenerateSilence(TimeSpan ts) {
+            return new Silence(ts, AudioPlaybackEngine.Instance.WaveFormat);
+        }
+
+        public static Silence GenerateSilence(int seconds) {
+            return GenerateSilence(new TimeSpan(0, 0, seconds));
+        }
+
+        public static Silence GenerateSilence(int mins, int secs) {
+            return GenerateSilence(new TimeSpan(0, mins, secs));
+        }
+
+        public static ISampleProvider ConvertSampleFormat(ISampleProvider source, WaveFormat dFormat) {
+            // resample, if required
+            if (source.WaveFormat.SampleRate != dFormat.SampleRate) source = new WdlResamplingSampleProvider(source, dFormat.SampleRate);
+            // adjust channel count, if required
+            if (source.WaveFormat.Channels != dFormat.Channels) source = SFXUtilities.AdjustChannelCount(source, (uint)dFormat.Channels);
+            return source;
+        }
+
+        public static ISampleProvider AdjustChannelCount(ISampleProvider snd, UInt32 AudioChannelCount) {
             if (AudioChannelCount == 1) {
                 if (snd.WaveFormat.Channels == 1) return snd;
                 return new MultiChannelToMonoSampleProvider(snd);

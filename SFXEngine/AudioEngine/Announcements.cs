@@ -18,7 +18,27 @@ namespace SFXEngine.AudioEngine {
         I35 = 35
     }
 
+    public struct IntervalTimeComboItem {
+        public IntervalTime intervalTime;
+        
+        public IntervalTimeComboItem(IntervalTime i) {
+            this.intervalTime = i;
+        }
+
+        public override String ToString() {
+            return ((int)intervalTime) + " minutes";
+        }
+    }
+
     public class Announcements {
+
+        public static object[] GetIntervalTimes() {
+            List<object> _result = new List<object>();
+            foreach (IntervalTime i in Enum.GetValues(typeof(IntervalTime))) {
+                _result.Add(new IntervalTimeComboItem(i));
+            }
+            return _result.ToArray();
+        }
 
         public static MP3SoundFile ShowBeginning {
             get {

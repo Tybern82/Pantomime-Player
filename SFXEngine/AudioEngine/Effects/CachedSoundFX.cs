@@ -14,6 +14,25 @@ namespace SFXEngine.AudioEngine.Effects {
 
         private WaveFormat _WaveFormat;
         public override WaveFormat WaveFormat { get { return _WaveFormat; } }
+        
+        public override Int64 currentSample {
+            get {
+                return position;
+            }
+        }
+
+        public override TimeSpan currentTime {
+            get {
+                long ticks = (long)Math.Round((double)(currentSample * TimeSpan.TicksPerSecond / (WaveFormat.SampleRate * WaveFormat.Channels)), MidpointRounding.ToEven);
+                return new TimeSpan(ticks);
+            }
+        }
+
+        public override Boolean isCachable {
+            get {
+                return true;
+            }
+        }
 
         private CachedSoundFX(WaveFormat fmt, TimeSpan length) {
             this.length = length;
@@ -56,7 +75,9 @@ namespace SFXEngine.AudioEngine.Effects {
         }
 
         public override SoundFX dup() {
-            return new CachedSoundFX(audioData, WaveFormat, length);
+            CachedSoundFX _result = new CachedSoundFX(audioData, WaveFormat, length);
+            _result.position = this.position;
+            return _result;
         }
 
         public override Boolean seekTo(TimeSpan index) {
@@ -86,7 +107,8 @@ namespace SFXEngine.AudioEngine.Effects {
                 if (availableSamples == 0) stop();
                 var samplesToCopy = Math.Min(availableSamples, count);
                 Array.Copy(this.audioData, position, buffer, offset, samplesToCopy);
-                position += samplesToCopy;
+                position += samplesToCopy;                
+                onSample.triggerEvent(this);
                 return (int)samplesToCopy;
             }
         }
