@@ -72,6 +72,7 @@
     <Compile Include="AudioEngine\Adapters\FadeSampleProvider.cs" />
     <Compile Include="AudioEngine\Adapters\MonoToMultiChannelSampleProvider.cs" />
     <Compile Include="AudioEngine\Adapters\MultiChannelToMonoSampleProvider.cs" />
+    <Compile Include="AudioEngine\Adapters\VolumeControlProvider.cs" />
     <Compile Include="AudioEngine\Announcements.cs" />
     <Compile Include="AudioEngine\AudioPlaybackEngine.cs" />
     <Compile Include="AudioEngine\Effects\BufferedSoundFX.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="AudioEngine\Effects\MP3SoundFile.cs" />
     <Compile Include="AudioEngine\Effects\Silence.cs" />
     <Compile Include="AudioEngine\Effects\SoundFile.cs" />
+    <Compile Include="AudioEngine\Groups\LoopedEffect.cs" />
     <Compile Include="AudioEngine\Groups\SoundFXCollection.cs" />
     <Compile Include="AudioEngine\Groups\SoundFXSequence.cs" />
     <Compile Include="AudioEngine\SoundFX.cs" />

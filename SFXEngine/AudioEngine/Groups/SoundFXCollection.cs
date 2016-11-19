@@ -36,7 +36,7 @@ namespace SFXEngine.AudioEngine.Groups {
 
         private MixingSampleProvider mixer;
 
-        public SoundFXCollection() : this(WaveFormat.CreateIeeeFloatWaveFormat(AudioPlaybackEngine.Instance.AudioSampleRate, AudioPlaybackEngine.Instance.AudioChannelCount)) { }
+        public SoundFXCollection() : this(AudioPlaybackEngine.Instance.WaveFormat) { }
 
         public SoundFXCollection(WaveFormat fmt) {
             this.mixer = new MixingSampleProvider(fmt);
@@ -52,7 +52,7 @@ namespace SFXEngine.AudioEngine.Groups {
                     break;
                 }
             }
-            if (fmt == null) fmt = WaveFormat.CreateIeeeFloatWaveFormat(AudioPlaybackEngine.Instance.AudioSampleRate, AudioPlaybackEngine.Instance.AudioChannelCount);
+            if (fmt == null) fmt = AudioPlaybackEngine.Instance.WaveFormat;
             this.mixer = new MixingSampleProvider(fmt);
             foreach (SoundFX fx in fxList) {
                 addSoundFX(fx);

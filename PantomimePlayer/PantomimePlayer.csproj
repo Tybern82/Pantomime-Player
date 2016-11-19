@@ -82,7 +82,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SFXPlayer.cs" />
     <EmbeddedResource Include="AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </EmbeddedResource>
@@ -115,6 +114,10 @@
     <ProjectReference Include="..\SFXEngine\SFXEngine.csproj">
       <Project>{7ba8d13d-318b-4b05-be45-7a01eba64247}</Project>
       <Name>SFXEngine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SFXPlayer\SFXPlayer.csproj">
+      <Project>{ab687645-6e7f-4022-a7d1-24068a3624ed}</Project>
+      <Name>SFXPlayer</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

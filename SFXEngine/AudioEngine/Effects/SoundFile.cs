@@ -36,7 +36,7 @@ namespace SFXEngine.AudioEngine.Effects {
         }
 
         public SoundFile(string filename) : this (new AudioFileReader(filename)) {
-            this.filename = filename;
+            this.filename = System.IO.Path.GetFullPath(filename);
             this.canDuplicate = true;   // with the original source data, we can duplicate the stream
         }
 

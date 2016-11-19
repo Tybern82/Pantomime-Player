@@ -24,10 +24,10 @@
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tMainWindow = new System.Windows.Forms.TabControl();
             this.pgEffects = new System.Windows.Forms.TabPage();
             this.datRegisteredEffects = new System.Windows.Forms.DataGridView();
@@ -69,6 +69,11 @@
             this.lblRunningTime = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblCurrentAction = new System.Windows.Forms.ToolStripStatusLabel();
             this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
+            this.grpEffectsControls = new System.Windows.Forms.GroupBox();
+            this.bAddEffect = new System.Windows.Forms.Button();
+            this.bRemoveEffect = new System.Windows.Forms.Button();
+            this.bRenumber = new System.Windows.Forms.Button();
+            this.bPlayNow = new System.Windows.Forms.Button();
             this.tMainWindow.SuspendLayout();
             this.pgEffects.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.datRegisteredEffects)).BeginInit();
@@ -77,6 +82,7 @@
             this.grpInterval.SuspendLayout();
             this.grpControls.SuspendLayout();
             this.sbarMainStatus.SuspendLayout();
+            this.grpEffectsControls.SuspendLayout();
             this.SuspendLayout();
             // 
             // tMainWindow
@@ -98,6 +104,7 @@
             // pgEffects
             // 
             this.pgEffects.BackColor = System.Drawing.SystemColors.Control;
+            this.pgEffects.Controls.Add(this.grpEffectsControls);
             this.pgEffects.Controls.Add(this.datRegisteredEffects);
             this.pgEffects.Location = new System.Drawing.Point(4, 4);
             this.pgEffects.Name = "pgEffects";
@@ -121,20 +128,20 @@
             this.Filename,
             this.Length,
             this.CacheMode});
-            this.datRegisteredEffects.Location = new System.Drawing.Point(7, 7);
-            this.datRegisteredEffects.MultiSelect = false;
+            this.datRegisteredEffects.Location = new System.Drawing.Point(102, 7);
             this.datRegisteredEffects.Name = "datRegisteredEffects";
             this.datRegisteredEffects.ReadOnly = true;
             this.datRegisteredEffects.RowHeadersVisible = false;
-            this.datRegisteredEffects.Size = new System.Drawing.Size(1155, 399);
+            this.datRegisteredEffects.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.datRegisteredEffects.Size = new System.Drawing.Size(1060, 399);
             this.datRegisteredEffects.TabIndex = 0;
             // 
             // SourceID
             // 
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle5.Format = "N0";
-            dataGridViewCellStyle5.NullValue = null;
-            this.SourceID.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle1.Format = "N0";
+            dataGridViewCellStyle1.NullValue = null;
+            this.SourceID.DefaultCellStyle = dataGridViewCellStyle1;
             this.SourceID.HeaderText = "Sound FX ID";
             this.SourceID.Name = "SourceID";
             this.SourceID.ReadOnly = true;
@@ -142,8 +149,8 @@
             // 
             // Filename
             // 
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            this.Filename.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            this.Filename.DefaultCellStyle = dataGridViewCellStyle2;
             this.Filename.HeaderText = "Filename";
             this.Filename.Name = "Filename";
             this.Filename.ReadOnly = true;
@@ -151,10 +158,10 @@
             // 
             // Length
             // 
-            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle7.Format = "h\\:mm\\:ss\\.FFF";
-            dataGridViewCellStyle7.NullValue = null;
-            this.Length.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle3.Format = "h\\:mm\\:ss\\.FFF";
+            dataGridViewCellStyle3.NullValue = null;
+            this.Length.DefaultCellStyle = dataGridViewCellStyle3;
             this.Length.HeaderText = "Total Time";
             this.Length.Name = "Length";
             this.Length.ReadOnly = true;
@@ -162,8 +169,8 @@
             // 
             // CacheMode
             // 
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.CacheMode.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.CacheMode.DefaultCellStyle = dataGridViewCellStyle4;
             this.CacheMode.HeaderText = "Cached/Buffered";
             this.CacheMode.Name = "CacheMode";
             this.CacheMode.ReadOnly = true;
@@ -208,13 +215,13 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.newToolStripMenuItem.Text = "&New";
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.openToolStripMenuItem.Text = "&Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -222,31 +229,31 @@
             // 
             this.saveToolStripMenuItem.Enabled = false;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.saveToolStripMenuItem.Text = "&Save";
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Enabled = false;
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.saveAsToolStripMenuItem.Text = "Save &As";
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(111, 6);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.closeToolStripMenuItem.Text = "&Close";
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -264,7 +271,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem.Text = "&About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -468,6 +475,59 @@
             this.dlgOpen.RestoreDirectory = true;
             this.dlgOpen.SupportMultiDottedExtensions = true;
             // 
+            // grpEffectsControls
+            // 
+            this.grpEffectsControls.Controls.Add(this.bPlayNow);
+            this.grpEffectsControls.Controls.Add(this.bRenumber);
+            this.grpEffectsControls.Controls.Add(this.bRemoveEffect);
+            this.grpEffectsControls.Controls.Add(this.bAddEffect);
+            this.grpEffectsControls.Location = new System.Drawing.Point(7, 7);
+            this.grpEffectsControls.Name = "grpEffectsControls";
+            this.grpEffectsControls.Size = new System.Drawing.Size(89, 162);
+            this.grpEffectsControls.TabIndex = 1;
+            this.grpEffectsControls.TabStop = false;
+            this.grpEffectsControls.Text = "Effects";
+            // 
+            // bAddEffect
+            // 
+            this.bAddEffect.Location = new System.Drawing.Point(7, 20);
+            this.bAddEffect.Name = "bAddEffect";
+            this.bAddEffect.Size = new System.Drawing.Size(75, 23);
+            this.bAddEffect.TabIndex = 0;
+            this.bAddEffect.Text = "Add";
+            this.bAddEffect.UseVisualStyleBackColor = true;
+            this.bAddEffect.Click += new System.EventHandler(this.bAddEffect_Click);
+            // 
+            // bRemoveEffect
+            // 
+            this.bRemoveEffect.Location = new System.Drawing.Point(7, 50);
+            this.bRemoveEffect.Name = "bRemoveEffect";
+            this.bRemoveEffect.Size = new System.Drawing.Size(75, 23);
+            this.bRemoveEffect.TabIndex = 1;
+            this.bRemoveEffect.Text = "Remove";
+            this.bRemoveEffect.UseVisualStyleBackColor = true;
+            this.bRemoveEffect.Click += new System.EventHandler(this.bRemoveEffect_Click);
+            // 
+            // bRenumber
+            // 
+            this.bRenumber.Location = new System.Drawing.Point(7, 100);
+            this.bRenumber.Name = "bRenumber";
+            this.bRenumber.Size = new System.Drawing.Size(75, 23);
+            this.bRenumber.TabIndex = 2;
+            this.bRenumber.Text = "Renumber";
+            this.bRenumber.UseVisualStyleBackColor = true;
+            this.bRenumber.Click += new System.EventHandler(this.bRenumber_Click);
+            // 
+            // bPlayNow
+            // 
+            this.bPlayNow.Location = new System.Drawing.Point(7, 130);
+            this.bPlayNow.Name = "bPlayNow";
+            this.bPlayNow.Size = new System.Drawing.Size(75, 23);
+            this.bPlayNow.TabIndex = 3;
+            this.bPlayNow.Text = "Play Now";
+            this.bPlayNow.UseVisualStyleBackColor = true;
+            this.bPlayNow.Click += new System.EventHandler(this.bPlayNow_Click);
+            // 
             // frmPantomime
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -493,6 +553,7 @@
             this.grpControls.ResumeLayout(false);
             this.sbarMainStatus.ResumeLayout(false);
             this.sbarMainStatus.PerformLayout();
+            this.grpEffectsControls.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -541,6 +602,11 @@
         private System.Windows.Forms.ToolStripStatusLabel lblTotalTimeLabel;
         private System.Windows.Forms.Button bStopAll;
         private System.Windows.Forms.Button bEndShow;
+        private System.Windows.Forms.GroupBox grpEffectsControls;
+        private System.Windows.Forms.Button bAddEffect;
+        private System.Windows.Forms.Button bRemoveEffect;
+        private System.Windows.Forms.Button bRenumber;
+        private System.Windows.Forms.Button bPlayNow;
     }
 }
 

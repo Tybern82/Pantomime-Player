@@ -14,5 +14,7 @@ namespace SFXEngine.AudioEngine {
         public static uint AudioBufferSize { get; set; } = 30 * AudioPlaybackEngine.DefaultSampleRate * AudioPlaybackEngine.DefaultChannelCount;
         // Default time to wait for the last of the audio data to be processed before auto-removing the mixer input
         public static TimeSpan AutoStopWaitTime { get; set; } = new TimeSpan(0, 0, 5);  // 5-seconds
+        // Maximum volume increase amount 
+        public static double MaxVolume { get; set; } = 3;   // limit to no more than triple original volume
     }
 }
