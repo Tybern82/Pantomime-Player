@@ -65,7 +65,7 @@ namespace SFXEngine.AudioEngine.Effects {
             while ((samplesRead = source.Read(readBuffer, 0, readBuffer.Length)) > 0) {
                 wholeFile.AddRange(readBuffer.Take(samplesRead));
                 totalSamples += samplesRead;
-                if (totalSamples > SFXEngineProperties.MaxCachedSoundSize) throw new ArgumentOutOfRangeException("source", "Attempt to cache a sample longer than the maximum permitted.");
+                if (totalSamples > SFXEngineProperties.getMaxCachedSoundSize()) throw new ArgumentOutOfRangeException("source", "Attempt to cache a sample longer than the maximum permitted.");
             }
             return wholeFile.ToArray();
         }

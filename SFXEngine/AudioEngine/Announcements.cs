@@ -88,7 +88,7 @@ namespace SFXEngine.AudioEngine {
             }
         }
 
-        public static MP3SoundFile SpecialNotice_AgathaChristie {
+        public static MP3SoundFile SpecialNotice {
             get {
                 return new MP3SoundFile(StandardAnnouncements.SpecialNotice_AgathaChristie);
             }

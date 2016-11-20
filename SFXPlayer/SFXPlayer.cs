@@ -18,6 +18,7 @@ namespace SFXPlayer {
         string actionStatusText { get; set; }
         string runtimeStatusText { get; set; }
         string showRuntimeStatusText { get; set; }
+        string titleBarText { get; set; }
 
         bool enableShowTimer { get; set; }
 
@@ -28,10 +29,18 @@ namespace SFXPlayer {
     }
 
     public class SFXPlayerControl {
+        private static log4net.ILog logger = log4net.LogManager.GetLogger(typeof(SFXPlayerControl));
+        
         public static readonly TimeSpan TS_5Minutes = new TimeSpan(0, 5, 0);
         public static readonly TimeSpan TS_1Second = new TimeSpan(0, 0, 1);
         public static readonly string ShortTimeFormat = @"mm\:ss";
         public static readonly string LongTimeFormat = @"h\:mm\:ss";
+
+        private SFXShowFile _currentShow;
+        public SFXShowFile currentShow {
+            get { return _currentShow; }
+            set { _currentShow = value;  SFXEngineProperties.ShowProperties = value.showDetails; }
+        }
 
         private SFXPlayerGUI gui;
         private TimeSpan totalRuntime = TimeSpan.Zero;
@@ -43,10 +52,10 @@ namespace SFXPlayer {
         public void onBeginPreshow() {
             gui.actionStatusText = "Preshow Audience Warnings...";
             SoundFXSequence seq = new SoundFXSequence(AudioPlaybackEngine.Instance.WaveFormat, new SoundFX[] {
-                Announcements.PreshowEntry_10,
+                currentShow.Announcements.PreshowEntry_10,
                 // SFXUtilities.GenerateSilence(10),
                 SFXUtilities.GenerateSilence(TS_5Minutes),
-                Announcements.PreshowEntry_5,
+                currentShow.Announcements.PreshowEntry_5,
                 // SFXUtilities.GenerateSilence(10),
                 SFXUtilities.GenerateSilence(TS_5Minutes)
             });
@@ -63,13 +72,13 @@ namespace SFXPlayer {
             showStart = new SoundFXSequence(AudioPlaybackEngine.Instance.WaveFormat, new SoundFX[] {
                 showStart,
                 SFXUtilities.GenerateSilence(2),
-                Announcements.PreshowInterval(iTime)
+                currentShow.Announcements.PreshowInterval(iTime)
             });
             if (needSpecialAnnouncement) {
                 showStart = new SoundFXSequence(AudioPlaybackEngine.Instance.WaveFormat, new SoundFX[] {
                     showStart,
                     SFXUtilities.GenerateSilence(2),
-                    Announcements.SpecialNotice_AgathaChristie
+                    currentShow.Announcements.SpecialNotice
                 });
             }
             showStart.onSample.addEventTrigger(updateStatusTimer);
@@ -94,11 +103,11 @@ namespace SFXPlayer {
                 SoundFile fx = new SoundFile(filename);
                 long _result = gui.registerEffect(fx);
                 if (_result == -1) {
-                    gui.displayMessage("Unable to register this sound effect.", "Error");
+                    gui.displayMessage("Unable to register this sound effect: <" + filename + ">", "Error");
                 }
                 return _result;
             } catch (Exception e) when ((e is UnsupportedAudioException) || (e is System.Runtime.InteropServices.COMException)) {
-                gui.displayMessage("Unsupported audio file.", "Unable to Open File");
+                gui.displayMessage("Unsupported audio file: <" + filename + ">", "Unable to Open File");
             }
             return -1;
         }
@@ -106,9 +115,9 @@ namespace SFXPlayer {
         public void onBeginInterval(IntervalTime iTime) {
             gui.actionStatusText = "Interval...";
             SoundFX fx = new SoundFXSequence(AudioPlaybackEngine.Instance.WaveFormat, new SoundFX[] {
-                Announcements.BeginInterval(iTime),
+                currentShow.Announcements.BeginInterval(iTime),
                 SFXUtilities.GenerateSilence((int)iTime-5, 0),
-                Announcements.Interval_5MinuteWarning,
+                currentShow.Announcements.Interval_5MinuteWarning,
                 SFXUtilities.GenerateSilence(TS_5Minutes)
             });
             fx.onSample.addEventTrigger(updateStatusTimer);
@@ -118,9 +127,10 @@ namespace SFXPlayer {
         }
 
         public void onOpenFile(string filename) {
-            gui.displayMessage("Requesting to open <" + filename + ">", "Open Show");
-
-            // TODO: Implement opening
+            logger.Info("onOpenFile: Requesting to open <" + filename + ">");
+            currentShow = new SFXShowFile(filename);
+            currentShow.showDetails.onChange.addEventTrigger(updateShowName);
+            gui.titleBarText = currentShow.showDetails.Name;
         }
 
         public void onStopAll() {
@@ -166,6 +176,16 @@ namespace SFXPlayer {
                 gui.actionStatusText = "ready";
                 gui.runtimeStatusText = "00:00";
             } catch (Exception) { } // ignore exceptions in updating the status bar
+        }
+
+        public void updateShowName(string property, object value) {
+            if (property == "Name") {
+                string name = (string)value;
+                gui.titleBarText = name;
+            } else if (property == "") {
+                SFXShowProperties props = (SFXShowProperties)value;
+                gui.titleBarText = props.Name;
+            }
         }
     }
 

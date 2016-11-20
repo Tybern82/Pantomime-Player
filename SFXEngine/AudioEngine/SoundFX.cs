@@ -41,8 +41,8 @@ namespace SFXEngine.AudioEngine {
 
         public virtual bool isCachable {
             get {
-                bool _isCachable = (length.TotalSeconds * WaveFormat.SampleRate * WaveFormat.Channels) <= SFXEngineProperties.MaxCachedSoundSize;
-                _isCachable |= (length - currentTime) <= SFXEngineProperties.MaxCachedSoundFile;
+                bool _isCachable = (length.TotalSeconds * WaveFormat.SampleRate * WaveFormat.Channels) <= SFXEngineProperties.getMaxCachedSoundSize();
+                _isCachable &= (length - currentTime) <= SFXEngineProperties.getMaxCachedSoundFile();
                 return _isCachable;
             }
         }

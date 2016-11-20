@@ -24,10 +24,10 @@
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tMainWindow = new System.Windows.Forms.TabControl();
             this.pgEffects = new System.Windows.Forms.TabPage();
             this.datRegisteredEffects = new System.Windows.Forms.DataGridView();
@@ -62,7 +62,7 @@
             this.btnInterval = new System.Windows.Forms.Button();
             this.grpControls = new System.Windows.Forms.GroupBox();
             this.bStopAll = new System.Windows.Forms.Button();
-            this.dlgFolderBrowser = new System.Windows.Forms.FolderBrowserDialog();
+            this.fDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.sbarMainStatus = new System.Windows.Forms.StatusStrip();
             this.lblShowRunTime = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblTotalTimeLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -138,10 +138,10 @@
             // 
             // SourceID
             // 
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle1.Format = "N0";
-            dataGridViewCellStyle1.NullValue = null;
-            this.SourceID.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle9.Format = "N0";
+            dataGridViewCellStyle9.NullValue = null;
+            this.SourceID.DefaultCellStyle = dataGridViewCellStyle9;
             this.SourceID.HeaderText = "Sound FX ID";
             this.SourceID.Name = "SourceID";
             this.SourceID.ReadOnly = true;
@@ -149,8 +149,8 @@
             // 
             // Filename
             // 
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            this.Filename.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            this.Filename.DefaultCellStyle = dataGridViewCellStyle10;
             this.Filename.HeaderText = "Filename";
             this.Filename.Name = "Filename";
             this.Filename.ReadOnly = true;
@@ -158,10 +158,10 @@
             // 
             // Length
             // 
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle3.Format = "h\\:mm\\:ss\\.FFF";
-            dataGridViewCellStyle3.NullValue = null;
-            this.Length.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle11.Format = "h\\:mm\\:ss\\.FFF";
+            dataGridViewCellStyle11.NullValue = null;
+            this.Length.DefaultCellStyle = dataGridViewCellStyle11;
             this.Length.HeaderText = "Total Time";
             this.Length.Name = "Length";
             this.Length.ReadOnly = true;
@@ -169,8 +169,8 @@
             // 
             // CacheMode
             // 
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.CacheMode.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.CacheMode.DefaultCellStyle = dataGridViewCellStyle12;
             this.CacheMode.HeaderText = "Cached/Buffered";
             this.CacheMode.Name = "CacheMode";
             this.CacheMode.ReadOnly = true;
@@ -215,13 +215,14 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.newToolStripMenuItem.Text = "&New";
+            this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.openToolStripMenuItem.Text = "&Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -229,31 +230,31 @@
             // 
             this.saveToolStripMenuItem.Enabled = false;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.saveToolStripMenuItem.Text = "&Save";
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Enabled = false;
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.saveAsToolStripMenuItem.Text = "Save &As";
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(111, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.closeToolStripMenuItem.Text = "&Close";
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -289,6 +290,7 @@
             this.effectToolStripMenuItem.Name = "effectToolStripMenuItem";
             this.effectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.effectToolStripMenuItem.Text = "&Effect";
+            this.effectToolStripMenuItem.Click += new System.EventHandler(this.effectToolStripMenuItem_Click);
             // 
             // cueToolStripMenuItem
             // 
@@ -420,9 +422,9 @@
             this.bStopAll.UseVisualStyleBackColor = true;
             this.bStopAll.Click += new System.EventHandler(this.bStopAll_Click);
             // 
-            // dlgFolderBrowser
+            // fDialog
             // 
-            this.dlgFolderBrowser.RootFolder = System.Environment.SpecialFolder.MyComputer;
+            this.fDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
             // 
             // sbarMainStatus
             // 
@@ -467,11 +469,12 @@
             this.lblCurrentAction.Margin = new System.Windows.Forms.Padding(10, 3, 0, 2);
             this.lblCurrentAction.Name = "lblCurrentAction";
             this.lblCurrentAction.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lblCurrentAction.Size = new System.Drawing.Size(203, 17);
-            this.lblCurrentAction.Text = "1001 Arabian Nights.... and a Matinee";
+            this.lblCurrentAction.Size = new System.Drawing.Size(36, 17);
+            this.lblCurrentAction.Text = "ready";
             // 
             // dlgOpen
             // 
+            this.dlgOpen.Multiselect = true;
             this.dlgOpen.RestoreDirectory = true;
             this.dlgOpen.SupportMultiDottedExtensions = true;
             // 
@@ -586,7 +589,7 @@
         private System.Windows.Forms.GroupBox grpInterval;
         private System.Windows.Forms.Button btnInterval;
         private System.Windows.Forms.GroupBox grpControls;
-        private System.Windows.Forms.FolderBrowserDialog dlgFolderBrowser;
+        private System.Windows.Forms.FolderBrowserDialog fDialog;
         private System.Windows.Forms.StatusStrip sbarMainStatus;
         private System.Windows.Forms.ToolStripStatusLabel lblRunningTime;
         private System.Windows.Forms.ToolStripStatusLabel lblCurrentAction;

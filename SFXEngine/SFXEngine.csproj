@@ -89,6 +89,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>StandardAnnouncements.resx</DependentUpon>
     </Compile>
+    <Compile Include="Events\PropertyEventRegister.cs" />
     <Compile Include="Events\SoundEventRegister.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AudioEngine\SFXEngineProperties.cs" />

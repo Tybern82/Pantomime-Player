@@ -21,22 +21,19 @@ namespace PantomimePlayer {
 
         public frmPantomime() {
             InitializeComponent();
-            // player = new SFXPlayer(_displayMessage, statusBarUpdateTime, statusBarUpdateFinished);
             player = new SFXPlayerControl(this);
             cmbIntervalTime.Items.AddRange(Announcements.GetIntervalTimes());
             selectIntervalTime(IntervalTime.I20);
             TS_Tick = new TimeSpan(0, 0, 0, 0, tShow.Interval);
-
-            if (dlgOpen.ShowDialog() == DialogResult.OK) {
-                player.onRegisterEffect(dlgOpen.FileName);
-            } else {
-                datRegisteredEffects.Rows.Add(new object[] {
-                    0,
-                    "SampleFilename.mp3",
-                    new TimeSpan(0, 0, 30),
-                    "Cached"
-                });
+            frmInitialLoad dlg = new frmInitialLoad();
+            if (dlg.ShowDialog() != DialogResult.OK) this.DialogResult = DialogResult.Abort;
+            else {
+                player.onOpenFile(dlg.SelectedShow.FullName);
+                player.currentShow.showDetails.Name = "1001 Arabian Nights... and a Matinee";
+                player.currentShow.showDetails.Organisation = "ZPAC Theatre";
+                player.currentShow.showDetails.FXDesign = "Jeff Sweeney";
             }
+            dlg.Dispose();
         }
 
         private void selectIntervalTime(IntervalTime i) {
@@ -72,7 +69,7 @@ namespace PantomimePlayer {
                 // first check the effect is not already registered
                 foreach (RegisteredEffect e in registeredEffects.Values) {
                     if (e.Filename == fx.filename) {
-                        _displayMessage("This sound file has already been loaded at: " + e.SourceID, "Error loading Sound File");
+                        _displayMessage("This sound file <" + e.Filename + "> has already been loaded at: " + e.SourceID, "Error loading Sound File");
                         return e.SourceID;
                     }
                 }
@@ -120,6 +117,7 @@ namespace PantomimePlayer {
                 AudioPlaybackEngine.Instance.stop();
                 this.Close();
                 this.Dispose();
+                log4net.LogManager.Shutdown();
             }
             return _result;
         }
@@ -181,6 +179,20 @@ namespace PantomimePlayer {
             }
         }
 
+        public string titleBarText {
+            get {
+                return this.Text;
+            }
+            set {
+                try {
+                    this.Invoke(new Action(() => this.Text = value));
+                } catch (InvalidOperationException) {
+                    // thrown when the window hasn't been created yet, should therefore be on the GUI thread...
+                    this.Text = value;
+                }
+            }
+        }
+
         public Boolean enableShowTimer {
             get {
                 return tShow.Enabled;
@@ -208,8 +220,14 @@ namespace PantomimePlayer {
         }
 
         private void openToolStripMenuItem_Click(Object sender, EventArgs e) {
-            DialogResult _result = dlgFolderBrowser.ShowDialog();
-            if (_result == DialogResult.OK) player.onOpenFile(dlgFolderBrowser.SelectedPath);
+            fDialog.ShowNewFolderButton = false;
+            if (fDialog.ShowDialog() == DialogResult.OK) {
+                DirectoryInfo dInfo = new DirectoryInfo(fDialog.SelectedPath);
+                if (!SFXShowFile.verifyShowFile(dInfo)) MessageBox.Show("Unable to locate a show file at this location.");
+                else {
+                    player.onOpenFile(dInfo.FullName);
+                }
+            }
         }
 
         private void aboutToolStripMenuItem_Click(Object sender, EventArgs e) {
@@ -219,7 +237,15 @@ namespace PantomimePlayer {
 
         private void bAddEffect_Click(Object sender, EventArgs e) {
             if (dlgOpen.ShowDialog() == DialogResult.OK) {
-                player.onRegisterEffect(dlgOpen.FileName);
+                string[] files = dlgOpen.FileNames;
+                foreach (string str in files) player.onRegisterEffect(str);
+            }
+        }
+
+        private void effectToolStripMenuItem_Click(Object sender, EventArgs e) {
+            if (dlgOpen.ShowDialog() == DialogResult.OK) {
+                string[] files = dlgOpen.FileNames;
+                foreach (string str in files) player.onRegisterEffect(str);
             }
         }
 
@@ -287,6 +313,30 @@ namespace PantomimePlayer {
                         if (datRegisteredEffects.SelectedRows.Contains(row)) idsToPlay.Add((uint)row.Cells[0].Value);
                     }
                     player.onPlayCueCollection(idsToPlay);
+                }
+            }
+        }
+
+        private void newToolStripMenuItem_Click(Object sender, EventArgs e) {
+            fDialog.ShowNewFolderButton = true;
+            if (fDialog.ShowDialog() == DialogResult.OK) {
+                DirectoryInfo dInfo = new DirectoryInfo(fDialog.SelectedPath);
+                if (SFXShowFile.verifyShowFile(dInfo)) {
+                    var _result = MessageBox.Show("The requested show exists, do you want to overwrite it?\nSelect 'Yes' to overwrite, 'No' to open the existing show file or 'Cancel' to go back.", "Overwrite?", MessageBoxButtons.YesNoCancel);
+                    switch (_result) {
+                        case DialogResult.Yes:
+                            try {
+                                foreach (DirectoryInfo d in dInfo.EnumerateDirectories()) d.Delete(true);
+                                foreach (FileInfo f in dInfo.EnumerateFiles()) f.Delete();
+                            } catch (Exception) {
+                                MessageBox.Show("Unable to erase the existing show files completely. Please delete manually and try again.");
+                                break;
+                            }
+                            goto case DialogResult.No;
+                        case DialogResult.No:
+                            player.onOpenFile(dInfo.FullName);
+                            break;
+                    }
                 }
             }
         }

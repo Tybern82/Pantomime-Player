@@ -17,7 +17,7 @@ namespace SFXEngine.AudioEngine.Adapters {
             set {
                 if (value < 0)
                     throw new ArgumentOutOfRangeException("volumeMultiplier", value, "Volume cannot be negative.");
-                if (value > SFXEngineProperties.MaxVolume)
+                if (value > SFXEngineProperties.getMaxVolume())
                     throw new ArgumentOutOfRangeException("volumeMultiplier", value, "Volume cannot be increased to this level.");
                 this._volumeMultiplier = value;
             }

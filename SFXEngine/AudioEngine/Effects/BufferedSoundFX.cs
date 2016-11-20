@@ -11,11 +11,6 @@ namespace SFXEngine.AudioEngine.Effects {
     public class BufferedSoundFX : SFXEngine.AudioEngine.SoundFX {
         private static log4net.ILog log = log4net.LogManager.GetLogger(typeof(BufferedSoundFX));
 
-        static BufferedSoundFX() {
-            // TODO: Move this to application level
-            log4net.Config.BasicConfigurator.Configure();
-        }
-
         private float[] mainBuffer;
         private float[] secondaryBuffer;
         private object mainBuffer_lock = new object();
@@ -79,7 +74,7 @@ namespace SFXEngine.AudioEngine.Effects {
                         while ((samplesRead = snd.source.Read(readBuffer, 0, readBuffer.Length)) > 0) {
                             buffer.AddRange(readBuffer.Take(samplesRead));
                             totalSamples += samplesRead;
-                            if (totalSamples >= SFXEngineProperties.AudioBufferSize) break;
+                            if (totalSamples >= SFXEngineProperties.getAudioBufferSize()) break;
                         }
                         snd.secondaryBuffer = buffer.ToArray();
                     }

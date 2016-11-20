@@ -9,7 +9,19 @@ using NAudio.Wave;
 namespace SFXEngine.AudioEngine.Effects {
     public class SoundFile : SFXEngine.AudioEngine.SoundFX, IDisposable {
 
-        private AudioFileReader source;
+        private AudioFileReader _source;
+        private AudioFileReader source {
+            get {
+                return _source;
+            }
+            set {
+                // Make sure we properly dispose of any existing reader (ignore dispose if not set, or
+                // if we are assigning the same reader, so we don't dispose a reader we're still using).
+                if ((_source != null) && ((value == null) || (_source != value))) _Dispose();
+                _source = value;
+            }
+        }
+        
         private ISampleProvider readerSample;
 
         public string filename { get; private set; }
@@ -38,6 +50,10 @@ namespace SFXEngine.AudioEngine.Effects {
         public SoundFile(string filename) : this (new AudioFileReader(filename)) {
             this.filename = System.IO.Path.GetFullPath(filename);
             this.canDuplicate = true;   // with the original source data, we can duplicate the stream
+        }
+
+        ~SoundFile() {
+            _Dispose();
         }
 
         public override SoundFX dup() {
@@ -93,7 +109,12 @@ namespace SFXEngine.AudioEngine.Effects {
         }
 
         public void Dispose() {
-            ((IDisposable)source).Dispose();
+            _Dispose();
+            GC.SuppressFinalize(this);
+        }
+
+        private void _Dispose() {
+            if (_source != null) ((IDisposable)_source).Dispose();
         }
     }
 }
