@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 using SFXEngine.Events;
 using SFXEngine.AudioEngine;
@@ -11,9 +12,11 @@ using SFXEngine.AudioEngine.Groups;
 
 namespace SFXPlayer {
     public delegate void DisplayMessage(string message, string title);
+    public delegate FileInfo SaveFile(DirectoryInfo basePath, FileInfo original);
 
     public interface SFXPlayerGUI {
         DisplayMessage displayMessage { get; }
+        SaveFile saveSoundFile { get; }
 
         string actionStatusText { get; set; }
         string runtimeStatusText { get; set; }
@@ -22,10 +25,8 @@ namespace SFXPlayer {
 
         bool enableShowTimer { get; set; }
 
-        bool isRegisteredEffect(uint regID);
-        RegisteredEffect getRegisteredEffect(uint regID);
-        long registerEffect(SoundFile fx);
-        bool updateEffect(uint reqIndex, SoundFile fx);
+        void addRegisteredEffect(RegisteredEffect e);   // add a new entry to the effects table
+        void updateRegisteredEffects();                 // do a complete update on the entire effects table
     }
 
     public class SFXPlayerControl {
@@ -39,7 +40,12 @@ namespace SFXPlayer {
         private SFXShowFile _currentShow;
         public SFXShowFile currentShow {
             get { return _currentShow; }
-            set { _currentShow = value;  SFXEngineProperties.ShowProperties = value.showDetails; }
+            set {
+                _currentShow = value;
+                SFXEngineProperties.ShowProperties = value.showDetails;
+                logger.Debug("Updating RelativeBase: <" + value.baseDirectory + ">");
+                SFXEngineProperties.RelativeBase = value.baseDirectory;
+            }
         }
 
         private SFXPlayerGUI gui;
@@ -100,10 +106,17 @@ namespace SFXPlayer {
 
         public long onRegisterEffect(string filename) {
             try {
-                SoundFile fx = new SoundFile(filename);
-                long _result = gui.registerEffect(fx);
+                FileInfo sfxFile = gui.saveSoundFile(currentShow.soundsDirectory, new FileInfo(filename));
+                if (sfxFile == null) {
+                    gui.displayMessage("Unable to save this sound effect: <" + filename + ">", "Error");
+                    return -1;
+                }
+                SoundFile fx = new SoundFile(sfxFile);
+                long _result = currentShow.registerEffect(fx);
                 if (_result == -1) {
                     gui.displayMessage("Unable to register this sound effect: <" + filename + ">", "Error");
+                } else {
+                    gui.addRegisteredEffect(currentShow.getRegisteredEffect((uint)_result));
                 }
                 return _result;
             } catch (Exception e) when ((e is UnsupportedAudioException) || (e is System.Runtime.InteropServices.COMException)) {
@@ -128,9 +141,17 @@ namespace SFXPlayer {
 
         public void onOpenFile(string filename) {
             logger.Info("onOpenFile: Requesting to open <" + filename + ">");
+            onCloseFile();
+            SFXEngineProperties.RelativeBase = new DirectoryInfo(filename);
             currentShow = new SFXShowFile(filename);
             currentShow.showDetails.onChange.addEventTrigger(updateShowName);
             gui.titleBarText = currentShow.showDetails.Name;
+            gui.updateRegisteredEffects();
+        }
+
+        public void onCloseFile() {
+            onStopAll();
+            if (currentShow != null) currentShow.close();
         }
 
         public void onStopAll() {
@@ -146,9 +167,12 @@ namespace SFXPlayer {
         public void onPlayCueCollection(IEnumerable<uint> cueList) {
             SoundFXCollection cueCollection = new SoundFXCollection();
             foreach (uint i in cueList) {
-                RegisteredEffect e = gui.getRegisteredEffect(i);
+                RegisteredEffect e = currentShow.getRegisteredEffect(i);
                 if (e != null) cueCollection.addSoundFX(e.fx.dup());
             }
+            gui.actionStatusText = "Selected cues...";
+            cueCollection.onSample.addEventTrigger(updateStatusTimer);
+            cueCollection.onStop.addEventTrigger(statusTimerComplete);
             AudioPlaybackEngine.Instance.play(cueCollection);
         }
 
@@ -186,26 +210,6 @@ namespace SFXPlayer {
                 SFXShowProperties props = (SFXShowProperties)value;
                 gui.titleBarText = props.Name;
             }
-        }
-    }
-
-    public class RegisteredEffect {
-        public uint SourceID { get; private set; }
-        public string Filename { get { return fx.filename; } }
-        public TimeSpan Length { get { return fx.length; } }
-        public string CacheMode { get { return (fx.isCachable ? "Cached" : "Buffered"); } }
-
-        public SoundFile fx { get; set; }
-
-        public RegisteredEffect(uint id, SoundFile fx) {
-            this.SourceID = id;
-            this.fx = fx;
-        }
-
-        public object[] toRow() {
-            return new object[] {
-                SourceID, Filename, Length, CacheMode
-            };
         }
     }
 }

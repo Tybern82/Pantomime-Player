@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegisteredEffect.cs" />
     <Compile Include="SFXPlayer.cs" />
     <Compile Include="SFXShowFile.cs" />
     <Compile Include="SFXShowFileAnnouncements.cs" />

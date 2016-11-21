@@ -52,6 +52,8 @@ namespace SFXEngine.AudioEngine.Effects {
             this.canDuplicate = true;   // with the original source data, we can duplicate the stream
         }
 
+        public SoundFile(System.IO.FileInfo file) : this(file.FullName) {}
+
         ~SoundFile() {
             _Dispose();
         }

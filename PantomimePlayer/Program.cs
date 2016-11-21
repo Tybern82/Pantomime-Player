@@ -13,9 +13,9 @@ namespace PantomimePlayer {
         static void Main() {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            frmPantomime mainWindow = new frmPantomime();
             // Configure logging for the system.
             log4net.Config.BasicConfigurator.Configure();
+            frmPantomime mainWindow = new frmPantomime();
             if (mainWindow.DialogResult != DialogResult.Abort) {
                 Application.Run(mainWindow);
             } else {

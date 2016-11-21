@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace SFXEngine.AudioEngine {
     public class SFXEngineProperties {
@@ -16,6 +17,7 @@ namespace SFXEngine.AudioEngine {
         public static double MaxVolume { get; set; } = 3;   // limit to no more than triple original volume
         
         public static SFXProperties ShowProperties { private get; set; }
+        public static DirectoryInfo RelativeBase { get; set; }
 
         public static uint getMaxCachedSoundSize() {
             return (ShowProperties != null) ? ShowProperties.MaxCachedSoundSize : MaxCachedSoundSize;

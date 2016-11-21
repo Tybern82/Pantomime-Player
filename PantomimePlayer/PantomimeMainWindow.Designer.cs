@@ -24,12 +24,17 @@
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tMainWindow = new System.Windows.Forms.TabControl();
             this.pgEffects = new System.Windows.Forms.TabPage();
+            this.grpEffectsControls = new System.Windows.Forms.GroupBox();
+            this.bPlayNow = new System.Windows.Forms.Button();
+            this.bRenumber = new System.Windows.Forms.Button();
+            this.bRemoveEffect = new System.Windows.Forms.Button();
+            this.bAddEffect = new System.Windows.Forms.Button();
             this.datRegisteredEffects = new System.Windows.Forms.DataGridView();
             this.SourceID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Filename = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -43,7 +48,6 @@
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -69,20 +73,16 @@
             this.lblRunningTime = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblCurrentAction = new System.Windows.Forms.ToolStripStatusLabel();
             this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
-            this.grpEffectsControls = new System.Windows.Forms.GroupBox();
-            this.bAddEffect = new System.Windows.Forms.Button();
-            this.bRemoveEffect = new System.Windows.Forms.Button();
-            this.bRenumber = new System.Windows.Forms.Button();
-            this.bPlayNow = new System.Windows.Forms.Button();
+            this.dlgSave = new System.Windows.Forms.SaveFileDialog();
             this.tMainWindow.SuspendLayout();
             this.pgEffects.SuspendLayout();
+            this.grpEffectsControls.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.datRegisteredEffects)).BeginInit();
             this.mbarMainMenu.SuspendLayout();
             this.grpPreshow.SuspendLayout();
             this.grpInterval.SuspendLayout();
             this.grpControls.SuspendLayout();
             this.sbarMainStatus.SuspendLayout();
-            this.grpEffectsControls.SuspendLayout();
             this.SuspendLayout();
             // 
             // tMainWindow
@@ -113,6 +113,59 @@
             this.pgEffects.TabIndex = 0;
             this.pgEffects.Text = "Registered Sound FX";
             // 
+            // grpEffectsControls
+            // 
+            this.grpEffectsControls.Controls.Add(this.bPlayNow);
+            this.grpEffectsControls.Controls.Add(this.bRenumber);
+            this.grpEffectsControls.Controls.Add(this.bRemoveEffect);
+            this.grpEffectsControls.Controls.Add(this.bAddEffect);
+            this.grpEffectsControls.Location = new System.Drawing.Point(7, 7);
+            this.grpEffectsControls.Name = "grpEffectsControls";
+            this.grpEffectsControls.Size = new System.Drawing.Size(89, 162);
+            this.grpEffectsControls.TabIndex = 1;
+            this.grpEffectsControls.TabStop = false;
+            this.grpEffectsControls.Text = "Effects";
+            // 
+            // bPlayNow
+            // 
+            this.bPlayNow.Location = new System.Drawing.Point(7, 130);
+            this.bPlayNow.Name = "bPlayNow";
+            this.bPlayNow.Size = new System.Drawing.Size(75, 23);
+            this.bPlayNow.TabIndex = 3;
+            this.bPlayNow.Text = "Play Now";
+            this.bPlayNow.UseVisualStyleBackColor = true;
+            this.bPlayNow.Click += new System.EventHandler(this.bPlayNow_Click);
+            // 
+            // bRenumber
+            // 
+            this.bRenumber.Location = new System.Drawing.Point(7, 100);
+            this.bRenumber.Name = "bRenumber";
+            this.bRenumber.Size = new System.Drawing.Size(75, 23);
+            this.bRenumber.TabIndex = 2;
+            this.bRenumber.Text = "Renumber";
+            this.bRenumber.UseVisualStyleBackColor = true;
+            this.bRenumber.Click += new System.EventHandler(this.bRenumber_Click);
+            // 
+            // bRemoveEffect
+            // 
+            this.bRemoveEffect.Location = new System.Drawing.Point(7, 50);
+            this.bRemoveEffect.Name = "bRemoveEffect";
+            this.bRemoveEffect.Size = new System.Drawing.Size(75, 23);
+            this.bRemoveEffect.TabIndex = 1;
+            this.bRemoveEffect.Text = "Remove";
+            this.bRemoveEffect.UseVisualStyleBackColor = true;
+            this.bRemoveEffect.Click += new System.EventHandler(this.bRemoveEffect_Click);
+            // 
+            // bAddEffect
+            // 
+            this.bAddEffect.Location = new System.Drawing.Point(7, 20);
+            this.bAddEffect.Name = "bAddEffect";
+            this.bAddEffect.Size = new System.Drawing.Size(75, 23);
+            this.bAddEffect.TabIndex = 0;
+            this.bAddEffect.Text = "Add";
+            this.bAddEffect.UseVisualStyleBackColor = true;
+            this.bAddEffect.Click += new System.EventHandler(this.bAddEffect_Click);
+            // 
             // datRegisteredEffects
             // 
             this.datRegisteredEffects.AllowUserToAddRows = false;
@@ -138,10 +191,10 @@
             // 
             // SourceID
             // 
-            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle9.Format = "N0";
-            dataGridViewCellStyle9.NullValue = null;
-            this.SourceID.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle17.Format = "N0";
+            dataGridViewCellStyle17.NullValue = null;
+            this.SourceID.DefaultCellStyle = dataGridViewCellStyle17;
             this.SourceID.HeaderText = "Sound FX ID";
             this.SourceID.Name = "SourceID";
             this.SourceID.ReadOnly = true;
@@ -149,8 +202,8 @@
             // 
             // Filename
             // 
-            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            this.Filename.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            this.Filename.DefaultCellStyle = dataGridViewCellStyle18;
             this.Filename.HeaderText = "Filename";
             this.Filename.Name = "Filename";
             this.Filename.ReadOnly = true;
@@ -158,10 +211,10 @@
             // 
             // Length
             // 
-            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle11.Format = "h\\:mm\\:ss\\.FFF";
-            dataGridViewCellStyle11.NullValue = null;
-            this.Length.DefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle19.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle19.Format = "h\\:mm\\:ss\\.FFF";
+            dataGridViewCellStyle19.NullValue = null;
+            this.Length.DefaultCellStyle = dataGridViewCellStyle19;
             this.Length.HeaderText = "Total Time";
             this.Length.Name = "Length";
             this.Length.ReadOnly = true;
@@ -169,8 +222,8 @@
             // 
             // CacheMode
             // 
-            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.CacheMode.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle20.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.CacheMode.DefaultCellStyle = dataGridViewCellStyle20;
             this.CacheMode.HeaderText = "Cached/Buffered";
             this.CacheMode.Name = "CacheMode";
             this.CacheMode.ReadOnly = true;
@@ -206,7 +259,6 @@
             this.saveToolStripMenuItem,
             this.saveAsToolStripMenuItem,
             this.toolStripMenuItem1,
-            this.closeToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.mnuFile.Name = "mnuFile";
             this.mnuFile.Size = new System.Drawing.Size(37, 20);
@@ -215,14 +267,14 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.newToolStripMenuItem.Text = "&New";
             this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.openToolStripMenuItem.Text = "&Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -230,31 +282,25 @@
             // 
             this.saveToolStripMenuItem.Enabled = false;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.saveToolStripMenuItem.Text = "&Save";
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Enabled = false;
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.saveAsToolStripMenuItem.Text = "Save &As";
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
-            // 
-            // closeToolStripMenuItem
-            // 
-            this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.closeToolStripMenuItem.Text = "&Close";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(111, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -288,14 +334,14 @@
             // effectToolStripMenuItem
             // 
             this.effectToolStripMenuItem.Name = "effectToolStripMenuItem";
-            this.effectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.effectToolStripMenuItem.Size = new System.Drawing.Size(104, 22);
             this.effectToolStripMenuItem.Text = "&Effect";
             this.effectToolStripMenuItem.Click += new System.EventHandler(this.effectToolStripMenuItem_Click);
             // 
             // cueToolStripMenuItem
             // 
             this.cueToolStripMenuItem.Name = "cueToolStripMenuItem";
-            this.cueToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.cueToolStripMenuItem.Size = new System.Drawing.Size(104, 22);
             this.cueToolStripMenuItem.Text = "&Cue";
             // 
             // grpPreshow
@@ -478,58 +524,11 @@
             this.dlgOpen.RestoreDirectory = true;
             this.dlgOpen.SupportMultiDottedExtensions = true;
             // 
-            // grpEffectsControls
+            // dlgSave
             // 
-            this.grpEffectsControls.Controls.Add(this.bPlayNow);
-            this.grpEffectsControls.Controls.Add(this.bRenumber);
-            this.grpEffectsControls.Controls.Add(this.bRemoveEffect);
-            this.grpEffectsControls.Controls.Add(this.bAddEffect);
-            this.grpEffectsControls.Location = new System.Drawing.Point(7, 7);
-            this.grpEffectsControls.Name = "grpEffectsControls";
-            this.grpEffectsControls.Size = new System.Drawing.Size(89, 162);
-            this.grpEffectsControls.TabIndex = 1;
-            this.grpEffectsControls.TabStop = false;
-            this.grpEffectsControls.Text = "Effects";
-            // 
-            // bAddEffect
-            // 
-            this.bAddEffect.Location = new System.Drawing.Point(7, 20);
-            this.bAddEffect.Name = "bAddEffect";
-            this.bAddEffect.Size = new System.Drawing.Size(75, 23);
-            this.bAddEffect.TabIndex = 0;
-            this.bAddEffect.Text = "Add";
-            this.bAddEffect.UseVisualStyleBackColor = true;
-            this.bAddEffect.Click += new System.EventHandler(this.bAddEffect_Click);
-            // 
-            // bRemoveEffect
-            // 
-            this.bRemoveEffect.Location = new System.Drawing.Point(7, 50);
-            this.bRemoveEffect.Name = "bRemoveEffect";
-            this.bRemoveEffect.Size = new System.Drawing.Size(75, 23);
-            this.bRemoveEffect.TabIndex = 1;
-            this.bRemoveEffect.Text = "Remove";
-            this.bRemoveEffect.UseVisualStyleBackColor = true;
-            this.bRemoveEffect.Click += new System.EventHandler(this.bRemoveEffect_Click);
-            // 
-            // bRenumber
-            // 
-            this.bRenumber.Location = new System.Drawing.Point(7, 100);
-            this.bRenumber.Name = "bRenumber";
-            this.bRenumber.Size = new System.Drawing.Size(75, 23);
-            this.bRenumber.TabIndex = 2;
-            this.bRenumber.Text = "Renumber";
-            this.bRenumber.UseVisualStyleBackColor = true;
-            this.bRenumber.Click += new System.EventHandler(this.bRenumber_Click);
-            // 
-            // bPlayNow
-            // 
-            this.bPlayNow.Location = new System.Drawing.Point(7, 130);
-            this.bPlayNow.Name = "bPlayNow";
-            this.bPlayNow.Size = new System.Drawing.Size(75, 23);
-            this.bPlayNow.TabIndex = 3;
-            this.bPlayNow.Text = "Play Now";
-            this.bPlayNow.UseVisualStyleBackColor = true;
-            this.bPlayNow.Click += new System.EventHandler(this.bPlayNow_Click);
+            this.dlgSave.AddExtension = false;
+            this.dlgSave.RestoreDirectory = true;
+            this.dlgSave.SupportMultiDottedExtensions = true;
             // 
             // frmPantomime
             // 
@@ -547,6 +546,7 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmPantomime_FormClosing);
             this.tMainWindow.ResumeLayout(false);
             this.pgEffects.ResumeLayout(false);
+            this.grpEffectsControls.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.datRegisteredEffects)).EndInit();
             this.mbarMainMenu.ResumeLayout(false);
             this.mbarMainMenu.PerformLayout();
@@ -556,7 +556,6 @@
             this.grpControls.ResumeLayout(false);
             this.sbarMainStatus.ResumeLayout(false);
             this.sbarMainStatus.PerformLayout();
-            this.grpEffectsControls.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -575,7 +574,6 @@
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem;
@@ -610,6 +608,7 @@
         private System.Windows.Forms.Button bRemoveEffect;
         private System.Windows.Forms.Button bRenumber;
         private System.Windows.Forms.Button bPlayNow;
+        private System.Windows.Forms.SaveFileDialog dlgSave;
     }
 }
 

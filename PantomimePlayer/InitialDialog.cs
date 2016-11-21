@@ -25,13 +25,14 @@ namespace PantomimePlayer {
             if (fDialog.ShowDialog() == DialogResult.OK) {
                 DirectoryInfo dInfo = new DirectoryInfo(fDialog.SelectedPath);
                 this.SelectedShow = dInfo;
-                if (SFXShowFile.verifyShowFile(dInfo)) {
-                    var _result = MessageBox.Show("The requested show exists, do you want to overwrite it?\nSelect 'Yes' to overwrite, 'No' to open the existing show file or 'Cancel' to go back.", "Overwrite?", MessageBoxButtons.YesNoCancel);
+                if (isNotEmpty(dInfo)) {
+                    var _result = MessageBox.Show("There are files in the requested location, do you want to overwrite them?\nSelect 'Yes' to overwrite, 'No' to open the existing show file or 'Cancel' to go back.", "Overwrite?", MessageBoxButtons.YesNoCancel);
                     switch (_result) {
                         case DialogResult.Yes:
                             try {
-                                foreach (DirectoryInfo d in dInfo.EnumerateDirectories()) d.Delete(true);
-                                foreach (FileInfo f in dInfo.EnumerateFiles()) f.Delete();
+                                // only delete the contents - we're just going to recreate the directory anyway...
+                                foreach (DirectoryInfo d in dInfo.EnumerateDirectories()) deleteDirectory(d);
+                                foreach (FileInfo f in dInfo.EnumerateFiles()) deleteFile(f);
                             } catch (Exception) {
                                 MessageBox.Show("Unable to erase the existing show files completely. Please delete manually and try again.");
                                 break;
@@ -42,8 +43,27 @@ namespace PantomimePlayer {
                             this.Close();
                             break;
                     }
+                } else {
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
                 }
             }
+        }
+
+        private bool isNotEmpty(DirectoryInfo dInfo) {
+            return (dInfo.Exists && (dInfo.EnumerateDirectories().Count() != 0) && (dInfo.EnumerateFiles().Count() != 0));
+        }
+
+        private void deleteDirectory(DirectoryInfo targetDir) {
+            targetDir.Attributes = FileAttributes.Normal;
+            foreach (FileInfo f in targetDir.EnumerateFiles()) deleteFile(f);
+            foreach (DirectoryInfo d in targetDir.EnumerateDirectories()) deleteDirectory(d);
+            targetDir.Delete();
+        }
+
+        private void deleteFile(FileInfo targetFile) {
+            targetFile.Attributes = FileAttributes.Normal;
+            targetFile.Delete();
         }
 
         private void bOpen_Click(Object sender, EventArgs e) {

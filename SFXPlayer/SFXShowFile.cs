@@ -92,6 +92,11 @@ namespace SFXPlayer {
                 logger.Debug("Missing basic properties from show database. Corrupt DB?");
                 return false;
             }
+            tInfo = conn.GetTableInfo("RegisteredEffect");
+            if (tInfo.Count == 0) {
+                logger.Debug("Missing registry of sound effects in database. Corrupt DB?");
+                return false;
+            }
             // TODO: Continue implementing the structure check - in concert with createDBStructure()
             logger.Debug("Validate show file successfully.");
             return true;
@@ -101,6 +106,7 @@ namespace SFXPlayer {
             lock (conn_lock) {
                 conn.CreateTable<SFXShowProperties>();
                 conn.Insert(showDetails);
+                conn.CreateTable<RegisteredEffect>();
                 // TODO: Continue implementing the basic database structure
             }
         }
@@ -110,7 +116,77 @@ namespace SFXPlayer {
                 SFXShowProperties props = conn.Table<SFXShowProperties>().First();
                 if (props == null) conn.Insert(showDetails);
                 else showDetails.load(props);
+                lock (registeredEffects_lock) {
+                    foreach (RegisteredEffect e in conn.Table<RegisteredEffect>()) {
+                        registeredEffects[e.SourceID] = e;
+                    }
+                }
+                // TODO: Continue loading the datbase structure
             }
+        }
+
+        private SortedDictionary<uint, RegisteredEffect> registeredEffects = new SortedDictionary<uint, RegisteredEffect>();
+        private object registeredEffects_lock = new object();
+
+        public bool isRegisteredEffect(uint regID) {
+            lock (registeredEffects_lock) {
+                return registeredEffects.ContainsKey(regID);
+            }
+        }
+
+        public RegisteredEffect getRegisteredEffect(uint regID) {
+            lock (registeredEffects_lock) {
+                return registeredEffects[regID];
+            }
+        }
+
+        public List<RegisteredEffect> getRegisteredEffects() {
+            lock (registeredEffects_lock) {
+                return registeredEffects.Values.ToList();
+            }
+        }
+
+        private uint _nextEffect = 0;
+        public long registerEffect(SoundFile fx) {
+            lock (registeredEffects_lock) {
+                while (isRegisteredEffect(_nextEffect)) _nextEffect++;
+                updateEffect(_nextEffect, fx);
+                uint regID = _nextEffect;
+                _nextEffect++;
+                return regID;
+            }
+        }
+
+        public bool updateEffect(uint reqIndex, SoundFile fx) {
+            lock (registeredEffects_lock) {
+                if (isRegisteredEffect(reqIndex)) {
+                    if (fx == null) {
+                        registeredEffects.Remove(reqIndex);
+                        conn.Delete<RegisteredEffect>(reqIndex);
+                    } else {
+                        RegisteredEffect row = registeredEffects[reqIndex];
+                        row.fx = fx;
+                        registeredEffects[reqIndex] = row;
+                        conn.InsertOrReplace(row);
+                    }
+                    return true;
+                } else {
+                    if (fx == null) return false;
+                    RegisteredEffect row = new RegisteredEffect(reqIndex, fx);
+                    registeredEffects[reqIndex] = row;
+                    conn.InsertOrReplace(row);
+                    return false;
+                }
+            }
+        }
+
+        public void close() {
+            lock (registeredEffects_lock) {
+                foreach (RegisteredEffect row in registeredEffects.Values) {
+                    row.fx.Dispose();
+                }
+            }
+            // TODO: Cleanup the cue lists
         }
     }
 }

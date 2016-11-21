@@ -48,64 +48,6 @@ namespace PantomimePlayer {
             return ((IntervalTimeComboItem)cmbIntervalTime.SelectedItem).intervalTime;
         }
 
-        private SortedDictionary<uint, RegisteredEffect> registeredEffects = new SortedDictionary<uint, RegisteredEffect>();
-        private object registeredEffects_lock = new object();
-
-        public bool isRegisteredEffect(uint regID) {
-            lock (registeredEffects_lock) {
-                return registeredEffects.ContainsKey(regID);
-            }
-        }
-
-        public RegisteredEffect getRegisteredEffect(uint regID) {
-            lock (registeredEffects_lock) {
-                return registeredEffects[regID];
-            }
-        }
-
-        private uint _nextEffect = 0;
-        public long registerEffect(SoundFile fx) {
-            lock (registeredEffects_lock) {
-                // first check the effect is not already registered
-                foreach (RegisteredEffect e in registeredEffects.Values) {
-                    if (e.Filename == fx.filename) {
-                        _displayMessage("This sound file <" + e.Filename + "> has already been loaded at: " + e.SourceID, "Error loading Sound File");
-                        return e.SourceID;
-                    }
-                }
-                while (isRegisteredEffect(_nextEffect)) _nextEffect++;
-                updateEffect(_nextEffect, fx);
-                uint regID = _nextEffect;
-                _nextEffect++;
-                return regID;
-            }
-        }
-
-        public bool updateEffect(uint reqIndex, SoundFile fx) {
-            lock (registeredEffects_lock) {
-                if (isRegisteredEffect(reqIndex)) {
-                    if (fx == null) {
-                        registeredEffects.Remove(reqIndex);
-                    } else {
-                        RegisteredEffect row = registeredEffects[reqIndex];
-                        row.fx = fx;
-                        registeredEffects[reqIndex] = row;
-                        datRegisteredEffects.Rows.Clear();
-                        foreach (RegisteredEffect r in registeredEffects.Values) {
-                            datRegisteredEffects.Rows.Add(r.toRow());
-                        }
-                    }
-                    return true;
-                } else {
-                    if (fx == null) return false;
-                    RegisteredEffect row = new RegisteredEffect(reqIndex, fx);
-                    registeredEffects[reqIndex] = row;
-                    datRegisteredEffects.Rows.Add(row.toRow());
-                    return false;
-                }
-            }
-        }
-
         private void exitToolStripMenuItem_Click(Object sender, EventArgs e) {
             onExit();
         }
@@ -142,11 +84,47 @@ namespace PantomimePlayer {
             MessageBox.Show(msg, title);
         }
 
+        private FileInfo _saveSoundFile(DirectoryInfo baseDir, FileInfo original) {
+            if (!original.Exists) return null;  // original file does not exist... cannot save it
+            dlgSave.InitialDirectory = baseDir.FullName;
+            dlgSave.FileName = original.Name;
+            if (dlgSave.ShowDialog() == DialogResult.OK) {
+                try {
+                    return original.CopyTo(dlgSave.FileName, true);
+                } catch (Exception) {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+
+        public void addRegisteredEffect(RegisteredEffect row) {
+            lock (datRegisteredEffects_lock) {
+                datRegisteredEffects.Rows.Add(row.toRow());
+            }
+        }
+
+        public void updateRegisteredEffects() {
+            lock (datRegisteredEffects_lock) {
+                datRegisteredEffects.Rows.Clear();
+                foreach (RegisteredEffect r in player.currentShow.getRegisteredEffects()) {
+                    datRegisteredEffects.Rows.Add(r.toRow());
+                }
+            }
+        }
+
         private readonly TimeSpan TS_Tick;
 
-        DisplayMessage SFXPlayerGUI.displayMessage {
+        public DisplayMessage displayMessage {
             get {
                 return _displayMessage;
+            }
+        }
+
+        public SaveFile saveSoundFile {
+            get {
+                return _saveSoundFile;
             }
         }
 
@@ -249,8 +227,10 @@ namespace PantomimePlayer {
             }
         }
 
+        public object datRegisteredEffects_lock = new object();
+
         private void bRemoveEffect_Click(Object sender, EventArgs e) {
-            lock (registeredEffects_lock) {
+            lock (datRegisteredEffects_lock) {
                 if (datRegisteredEffects.SelectedRows.Count == 0) {
                     _displayMessage("Please select a row to remove first.", "No Row Selected");
                 } else {
@@ -263,7 +243,7 @@ namespace PantomimePlayer {
                         }
                     }
                     foreach (uint i in idsToDelete) {
-                        updateEffect(i, null);
+                        player.currentShow.updateEffect(i, null);
                     }
                     foreach (DataGridViewRow row in rowsToDelete) {
                         datRegisteredEffects.Rows.Remove(row);
@@ -273,38 +253,26 @@ namespace PantomimePlayer {
         }
 
         private void bRenumber_Click(Object sender, EventArgs e) {
-            lock (registeredEffects_lock) {
-                RegisteredEffect[] effects = registeredEffects.Values.ToArray();
-                registeredEffects.Clear();
-                _nextEffect = 0;
-                long maxID = effects.Length - 1;
+            lock (datRegisteredEffects_lock) {
+                var effects = player.currentShow.getRegisteredEffects();
+                uint _nextEffect = 0;
+                long maxID = effects.Count - 1;
                 foreach (RegisteredEffect ef in effects) {
-                    // First include all the effects which will be inside the new numbering range already
-                    // By not renumbering these, we avoid the possibility of numbering a new cue to the same as an existing one,
-                    // updating all of the references to point to the first cue registered.
-                    if (ef.SourceID <= maxID) {
-                        registeredEffects[ef.SourceID] = ef;
-                    }
-                }
-                foreach (RegisteredEffect ef in effects) {
-                    // Now we've registered all the effects which are in the existing numbering, register the effects which
-                    // are outside this numbering to fill in any gaps.
+                    // Only change cues which are outside the new numbering range
                     if (ef.SourceID > maxID) {
-                        while (isRegisteredEffect(_nextEffect)) _nextEffect++;
+                        while (player.currentShow.isRegisteredEffect(_nextEffect)) _nextEffect++;
                         RegisteredEffect nEffect = new RegisteredEffect(_nextEffect, ef.fx);
-                        registeredEffects[nEffect.SourceID] = nEffect;
+                        player.currentShow.updateEffect(ef.SourceID, null);     // remove the old mapping
+                        player.currentShow.updateEffect(_nextEffect, ef.fx);    // set the new mapping
                         player.updateEffectNumber(ef.SourceID, nEffect.SourceID);
                     }
                 }
-                datRegisteredEffects.Rows.Clear();
-                foreach (RegisteredEffect r in registeredEffects.Values) {
-                    datRegisteredEffects.Rows.Add(r.toRow());
-                }
+                updateRegisteredEffects();
             }
         }
 
         private void bPlayNow_Click(Object sender, EventArgs e) {
-            lock (registeredEffects_lock) {
+            lock (datRegisteredEffects_lock) {
                 if (datRegisteredEffects.SelectedRows.Count == 0) {
                     _displayMessage("No cue selected to play.", "No Row Selected");
                 } else {
@@ -321,13 +289,14 @@ namespace PantomimePlayer {
             fDialog.ShowNewFolderButton = true;
             if (fDialog.ShowDialog() == DialogResult.OK) {
                 DirectoryInfo dInfo = new DirectoryInfo(fDialog.SelectedPath);
-                if (SFXShowFile.verifyShowFile(dInfo)) {
-                    var _result = MessageBox.Show("The requested show exists, do you want to overwrite it?\nSelect 'Yes' to overwrite, 'No' to open the existing show file or 'Cancel' to go back.", "Overwrite?", MessageBoxButtons.YesNoCancel);
+                if (isNotEmpty(dInfo)) {
+                    var _result = MessageBox.Show("There are files in the requested location, do you want to overwrite them?\nSelect 'Yes' to overwrite, 'No' to open the existing show file or 'Cancel' to go back.", "Overwrite?", MessageBoxButtons.YesNoCancel);
                     switch (_result) {
                         case DialogResult.Yes:
                             try {
-                                foreach (DirectoryInfo d in dInfo.EnumerateDirectories()) d.Delete(true);
-                                foreach (FileInfo f in dInfo.EnumerateFiles()) f.Delete();
+                                // only delete the contents - we're just going to recreate the directory anyway...
+                                foreach (DirectoryInfo d in dInfo.EnumerateDirectories()) deleteDirectory(d);
+                                foreach (FileInfo f in dInfo.EnumerateFiles()) deleteFile(f);
                             } catch (Exception) {
                                 MessageBox.Show("Unable to erase the existing show files completely. Please delete manually and try again.");
                                 break;
@@ -337,8 +306,26 @@ namespace PantomimePlayer {
                             player.onOpenFile(dInfo.FullName);
                             break;
                     }
+                } else {
+                    player.onOpenFile(dInfo.FullName);
                 }
             }
+        }
+
+        private bool isNotEmpty(DirectoryInfo dInfo) {
+            return (dInfo.Exists && (dInfo.EnumerateDirectories().Count() != 0) && (dInfo.EnumerateFiles().Count() != 0));
+        }
+
+        private void deleteDirectory(DirectoryInfo targetDir) {
+            targetDir.Attributes = FileAttributes.Normal;
+            foreach (FileInfo f in targetDir.EnumerateFiles()) deleteFile(f);
+            foreach (DirectoryInfo d in targetDir.EnumerateDirectories()) deleteDirectory(d);
+            targetDir.Delete();
+        }
+
+        private void deleteFile(FileInfo targetFile) {
+            targetFile.Attributes = FileAttributes.Normal;
+            targetFile.Delete();
         }
     }
 }
