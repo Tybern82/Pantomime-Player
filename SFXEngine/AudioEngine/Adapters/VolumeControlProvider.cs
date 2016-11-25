@@ -31,10 +31,12 @@ namespace SFXEngine.AudioEngine.Adapters {
 
         private ISampleProvider source;
 
-        public VolumeControlProvider(ISampleProvider source) {
+        public VolumeControlProvider(ISampleProvider source, double volume) {
             this.source = source;
-            this.volumeMultiplier = 1;
+            this.volumeMultiplier = volume;
         }
+
+        public VolumeControlProvider(ISampleProvider source) : this(source, 1.0) {}
 
         public Int32 Read(Single[] buffer, Int32 offset, Int32 count) {
             int samplesRead = source.Read(buffer, offset, count);

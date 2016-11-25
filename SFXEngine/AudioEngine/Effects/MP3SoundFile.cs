@@ -40,6 +40,22 @@ namespace SFXEngine.AudioEngine.Effects {
             this.canDuplicate = true;   // with the original source data, we can duplicate the stream
         }
 
+        ~MP3SoundFile() {
+            _Dispose();
+        }
+
+        public override Boolean stop() {
+            bool _result = base.stop();
+            if (_result) {
+                if (source != null) {
+                    ((IDisposable)source).Dispose();
+                    source = null;
+                    readerSample = null;
+                }
+            }
+            return _result;
+        }
+
         public override SoundFX dup() {
             if (canDuplicate) {
                 MP3SoundFile _result = new MP3SoundFile(mp3Data);
@@ -85,6 +101,7 @@ namespace SFXEngine.AudioEngine.Effects {
                     isPlaying = true;
                     onPlay.triggerEvent(this);
                 }
+                if (readerSample == null) return 0;
                 int _result = readerSample.Read(buffer, offset, count);
                 if (_result == 0) stop();
                 else onSample.triggerEvent(this);
@@ -93,7 +110,12 @@ namespace SFXEngine.AudioEngine.Effects {
         }
 
         public void Dispose() {
-            ((IDisposable)source).Dispose();
+            _Dispose();
+            GC.SuppressFinalize(this);
+        }
+
+        private void _Dispose() {
+            if (source != null) ((IDisposable)source).Dispose();
         }
     }
 }

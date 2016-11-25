@@ -50,7 +50,7 @@ namespace SFXPlayer {
             };
         }
 
-        private static string getAbsolutePath(string filename) {
+        public static string getAbsolutePath(string filename) {
             logger.Debug("Select absolute path for: [" + filename + "]");
             if (SFXEngineProperties.RelativeBase != null) {
                 Uri fName = new Uri(filename, UriKind.Relative);
@@ -67,7 +67,7 @@ namespace SFXPlayer {
             }
         }
 
-        private static string getRelativePath(string filename) {
+        public static string getRelativePath(string filename) {
             logger.Debug("Select relative path for: [" + filename + "]");
             if (SFXEngineProperties.RelativeBase != null) {
                 FileInfo fInfo = new FileInfo(filename);

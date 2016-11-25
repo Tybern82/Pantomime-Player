@@ -25,6 +25,8 @@ namespace SFXPlayer {
             }
         }
 
+        public CueGroup rootCues { get; private set; }
+
         private SQLiteConnection conn;
         private object conn_lock = new object();
 
@@ -97,6 +99,19 @@ namespace SFXPlayer {
                 logger.Debug("Missing registry of sound effects in database. Corrupt DB?");
                 return false;
             }
+            tInfo = conn.GetTableInfo("RegisteredCue");
+            if (tInfo.Count == 0) {
+                logger.Debug("Missing registered cues in database. Corrupt DB?");
+                return false;
+            }
+            CueGroup g = null;
+            try {
+                g = conn.Get<CueGroup>(0);
+            } catch (Exception) {}
+            if (g == null) {
+                logger.Debug("Missing root cue element. Corrupt DB?");
+                return false;
+            }
             // TODO: Continue implementing the structure check - in concert with createDBStructure()
             logger.Debug("Validate show file successfully.");
             return true;
@@ -104,24 +119,171 @@ namespace SFXPlayer {
 
         private void createDBStructure() {
             lock (conn_lock) {
+                // Stores the basic information about the show - this table only contains a single row
                 conn.CreateTable<SFXShowProperties>();
                 conn.Insert(showDetails);
+                // Stores information about sound files used for cues
                 conn.CreateTable<RegisteredEffect>();
+                // Stores the cue information
+                conn.CreateTable<RegisteredCue>();
+                conn.CreateTable<SilenceCue>();
+                conn.CreateTable<CueGroup>();
+                conn.CreateTable<CueGroupElement>();
+                // Store the root cue grouping (used to define the ordering over the entire list of cues)
+                rootCues = new CueGroup();
+                rootCues.CueID = 0;
+                rootCues.Name = "Show Cues";
+                conn.InsertOrReplace(rootCues);
                 // TODO: Continue implementing the basic database structure
             }
         }
 
+        private bool loading = false;
         private void loadDBStructure() {
             lock (conn_lock) {
+                loading = true;
+                // Load the basic show properties
                 SFXShowProperties props = conn.Table<SFXShowProperties>().First();
                 if (props == null) conn.Insert(showDetails);
                 else showDetails.load(props);
+
+                // Load the registered sound effects
                 lock (registeredEffects_lock) {
                     foreach (RegisteredEffect e in conn.Table<RegisteredEffect>()) {
                         registeredEffects[e.SourceID] = e;
                     }
                 }
-                // TODO: Continue loading the datbase structure
+
+                // Load the cues
+                lock (cueTable_lock) {
+                    // Load the individual cue structures...
+                    foreach (Cue c in conn.Table<RegisteredCue>()) {
+                        // Cues linked to RegisteredEffect items
+                        c.currentShow = this;
+                        cueTable[c.CueID] = c;
+                    }
+                    foreach (SilenceCue c in conn.Table<SilenceCue>()) {
+                        // Cues representing a block of silence (used for timed pauses, wait times, etc)
+                        c.currentShow = this;
+                        cueTable[c.CueID] = c;
+                    }
+                    foreach (CueGroup g in conn.Table<CueGroup>()) {
+                        // Cues which will be filled to represent collection and sequences of other cues
+                        g.currentShow = this;
+                        cueTable[g.CueID] = g;
+                    }
+                    // All the individual cues have been loaded - now load the sequence/collection elements
+                    // Since the cue items link to the actual cue objects, these *must* be loaded last
+                    foreach (CueGroupElement e in conn.Table<CueGroupElement>()) {
+                        Cue c = cueTable[e.CueID];
+                        if (c is CueGroup) {
+                            CueGroup g = c as CueGroup;
+                            g.addElement(e);
+                        } else {
+                            throw new InvalidOperationException("Sequence item found for non-sequenced cue.");
+                        }
+                    }
+                    rootCues = cueTable[0] as CueGroup;
+                }
+                // TODO: Continue loading the database structure
+                loading = false;
+            }
+        }
+
+        private SortedDictionary<uint, Cue> cueTable = new SortedDictionary<uint, Cue>();
+        private object cueTable_lock = new object();
+
+        public bool isCue(uint cueID) {
+            lock (cueTable_lock) {
+                return cueTable.ContainsKey(cueID);
+            }
+        }
+
+        public Cue getCue(uint cueID) {
+            lock (cueTable_lock) {
+                return isCue(cueID) ? cueTable[cueID] : null;
+            }
+        }
+
+        public List<Cue> getRootCues() {
+            lock (cueTable_lock) {
+                return rootCues.cueItems.Values.ToList();
+            }
+        }
+
+        public CueGroup getParent(Cue cue) {
+            if (cue == null) return null;
+            if (cue == rootCues) return null;
+            foreach (Cue c in cueTable.Values) {
+                if ((c is CueGroup) && ((c as CueGroup).contains(cue))) return (c as CueGroup);
+            }
+            return null;
+        }
+
+        public void registerCue(Cue c) {
+            if (c == null) return;
+            c.currentShow = this;
+            cueTable[c.CueID] = c;
+            updateTable(c);
+        }
+
+        public void removeCue(Cue cue) {
+            if (cue.CueID == 0) return; // don't delete the root cues list
+            uint maxCue = (cueTable.Count == 0) ? 0 : cueTable.Keys.Max();
+            for (uint x = 0; x < maxCue; x++) {
+                Cue c = cueTable[x];
+                if ((c != null) && (c is CueGroup)) ((CueGroup)c).removeElement(c);
+            }
+            cueTable.Remove(cue.CueID);
+            if (cue is RegisteredCue) {
+                conn.Delete<RegisteredCue>(cue.CueID);
+            } else if (cue is SilenceCue) {
+                conn.Delete<SilenceCue>(cue.CueID);
+            } else if (cue is CueGroup) {
+                conn.Delete<CueGroup>(cue.CueID);
+            }
+        }
+
+        public void updateTable(Cue c) {
+            if (loading) return;    // don't make updates during the load cycle
+            if (c is RegisteredCue) {
+                updateRegisteredCue((RegisteredCue)c);
+            } else if (c is SilenceCue) {
+                updateSilenceCue((SilenceCue)c);
+            } else if (c is CueGroup) {
+                updateCueGroup((CueGroup)c);
+            }
+        }
+
+        private void updateRegisteredCue(RegisteredCue cue) {
+            conn.InsertOrReplace(cue);
+        }
+
+        private void updateSilenceCue(SilenceCue cue) {
+            conn.InsertOrReplace(cue);
+        }
+
+        private void updateCueGroup(CueGroup cue) {
+            conn.InsertOrReplace(cue);
+            foreach (var item in cue.cueItems) {
+                CueGroupElement elem = new CueGroupElement();
+                elem.CueID = cue.CueID;
+                elem.ItemSequence = item.Key;
+                elem.ItemID = item.Value.CueID;
+                long id = -1;
+                foreach (var i in conn.Table<CueGroupElement>()) {
+                    if ((i.CueID == elem.CueID) && (i.ItemSequence == elem.ItemSequence)) {
+                        id = (long)i.ElementID;
+                        break;
+                    }
+                }
+                if (id == -1) {
+                    elem.ElementID = null;
+                    conn.Insert(elem);
+                } else {
+                    elem.ElementID = (uint)id;
+                    conn.InsertOrReplace(elem);
+                }
             }
         }
 
@@ -183,7 +345,7 @@ namespace SFXPlayer {
         public void close() {
             lock (registeredEffects_lock) {
                 foreach (RegisteredEffect row in registeredEffects.Values) {
-                    row.fx.Dispose();
+                    row.fx.close();
                 }
             }
             // TODO: Cleanup the cue lists

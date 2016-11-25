@@ -27,6 +27,7 @@ namespace SFXPlayer {
 
         void addRegisteredEffect(RegisteredEffect e);   // add a new entry to the effects table
         void updateRegisteredEffects();                 // do a complete update on the entire effects table
+        void updateCues();                              // do a complete update on the entire cues table
     }
 
     public class SFXPlayerControl {
@@ -147,6 +148,7 @@ namespace SFXPlayer {
             currentShow.showDetails.onChange.addEventTrigger(updateShowName);
             gui.titleBarText = currentShow.showDetails.Name;
             gui.updateRegisteredEffects();
+            gui.updateCues();
         }
 
         public void onCloseFile() {
@@ -164,12 +166,17 @@ namespace SFXPlayer {
             return true;
         }
 
-        public void onPlayCueCollection(IEnumerable<uint> cueList) {
+        public void onPlayCueCollection(IEnumerable<RegisteredEffect> cueList) {
             SoundFXCollection cueCollection = new SoundFXCollection();
+            foreach (RegisteredEffect e in cueList) {
+                cueCollection.addSoundFX(e.fx.dup());
+            }
+            /*
             foreach (uint i in cueList) {
                 RegisteredEffect e = currentShow.getRegisteredEffect(i);
                 if (e != null) cueCollection.addSoundFX(e.fx.dup());
             }
+            */
             gui.actionStatusText = "Selected cues...";
             cueCollection.onSample.addEventTrigger(updateStatusTimer);
             cueCollection.onStop.addEventTrigger(statusTimerComplete);

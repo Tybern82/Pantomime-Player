@@ -58,6 +58,21 @@ namespace SFXEngine.AudioEngine.Effects {
             _Dispose();
         }
 
+        public void close() {
+            stop();
+        }
+
+        public override Boolean stop() {
+            bool _result = base.stop();
+            if (_result) {
+                if (_source != null) {
+                    ((IDisposable)_source).Dispose();
+                    _source = null;
+                }
+            }
+            return _result;
+        }
+
         public override SoundFX dup() {
             if (canDuplicate) {
                 SoundFile _result = new SoundFile(filename);

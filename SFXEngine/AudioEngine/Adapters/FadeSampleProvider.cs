@@ -19,7 +19,7 @@ namespace SFXEngine.AudioEngine.Adapters {
         private readonly ISampleProvider source;
 
         private readonly long autoFadeOutSample;
-        private readonly double autoFadeDuration;
+        private readonly TimeSpan autoFadeDuration;
 
         private long totalSamples;
 
@@ -42,12 +42,12 @@ namespace SFXEngine.AudioEngine.Adapters {
         public FadeSampleProvider(ISampleProvider source, TimeSpan autoFadeTime, TimeSpan autoFadeDuration) : this (source) {
             int samplesPerSecond = WaveFormat.SampleRate * WaveFormat.Channels;
             this.autoFadeOutSample = (long)Math.Round(autoFadeTime.TotalSeconds * samplesPerSecond, MidpointRounding.AwayFromZero);
-            this.autoFadeDuration = autoFadeDuration.TotalMilliseconds;
+            this.autoFadeDuration = autoFadeDuration;
         }
 
         public FadeSampleProvider(ISampleProvider source, TimeSpan fadeInDuration, TimeSpan autoFadeTime, TimeSpan autoFadeDuration) 
             : this(source, autoFadeTime, autoFadeDuration) {
-            fadeIn(fadeInDuration.TotalMilliseconds);
+            if (fadeInDuration != TimeSpan.Zero) fadeIn(fadeInDuration.TotalMilliseconds);
         }
 
         public void fadeIn(double durationInMillis) {
@@ -56,6 +56,10 @@ namespace SFXEngine.AudioEngine.Adapters {
                 fadeSampleCount = (int)((durationInMillis * WaveFormat.SampleRate) / 1000);
                 fadeState = FadeState.FadeIn;
             }
+        }
+
+        public void fadeOut() {
+            fadeOut(autoFadeDuration.TotalMilliseconds);
         }
 
         public void fadeOut(double durationInMillis) {
@@ -71,7 +75,7 @@ namespace SFXEngine.AudioEngine.Adapters {
             if ((fadeState == FadeState.FullVolume) && (totalSamples + sourceSamplesRead > autoFadeOutSample)) {
                 // need to begin the fadeout
                 int unfadedSamples = (int)(autoFadeOutSample - totalSamples);
-                fadeOut(autoFadeDuration);
+                fadeOut();
                 if (unfadedSamples > 0) {
                     doFadeOut(buffer, offset + unfadedSamples, sourceSamplesRead - unfadedSamples);
                     totalSamples += sourceSamplesRead;

@@ -31,6 +31,8 @@ namespace SFXEngine.AudioEngine.Effects {
             }
         }
 
+        public Silence(TimeSpan ts) : this(ts, AudioPlaybackEngine.Instance.WaveFormat) {}
+
         public Silence(TimeSpan ts, WaveFormat fmt) : this(((long)Math.Round(ts.TotalSeconds * fmt.SampleRate * fmt.Channels, MidpointRounding.ToEven)), fmt) {
             this.length = ts;
         }

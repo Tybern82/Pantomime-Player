@@ -24,23 +24,20 @@
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tMainWindow = new System.Windows.Forms.TabControl();
             this.pgEffects = new System.Windows.Forms.TabPage();
+            this.lstSoundEffects = new BrightIdeasSoftware.ObjectListView();
+            this.cSoundFXID = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cFilename = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cLength = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cMode = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.grpEffectsControls = new System.Windows.Forms.GroupBox();
             this.bPlayNow = new System.Windows.Forms.Button();
             this.bRenumber = new System.Windows.Forms.Button();
             this.bRemoveEffect = new System.Windows.Forms.Button();
             this.bAddEffect = new System.Windows.Forms.Button();
-            this.datRegisteredEffects = new System.Windows.Forms.DataGridView();
-            this.SourceID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Filename = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Length = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CacheMode = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pgCues = new System.Windows.Forms.TabPage();
+            this.tCueList = new BrightIdeasSoftware.TreeListView();
             this.mbarMainMenu = new System.Windows.Forms.MenuStrip();
             this.mnuFile = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -74,15 +71,32 @@
             this.lblCurrentAction = new System.Windows.Forms.ToolStripStatusLabel();
             this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
             this.dlgSave = new System.Windows.Forms.SaveFileDialog();
+            this.gCues = new System.Windows.Forms.GroupBox();
+            this.bSilence = new System.Windows.Forms.Button();
+            this.bSoundFX = new System.Windows.Forms.Button();
+            this.bCollection = new System.Windows.Forms.Button();
+            this.bSequence = new System.Windows.Forms.Button();
+            this.bRemoveCue = new System.Windows.Forms.Button();
+            this.cCueID = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cCueName = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cCueLength = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cCueSeekTo = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cFadeIn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cFadeOut = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cFadeOutDuration = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cVolume = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.tMainWindow.SuspendLayout();
             this.pgEffects.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.lstSoundEffects)).BeginInit();
             this.grpEffectsControls.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.datRegisteredEffects)).BeginInit();
+            this.pgCues.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.tCueList)).BeginInit();
             this.mbarMainMenu.SuspendLayout();
             this.grpPreshow.SuspendLayout();
             this.grpInterval.SuspendLayout();
             this.grpControls.SuspendLayout();
             this.sbarMainStatus.SuspendLayout();
+            this.gCues.SuspendLayout();
             this.SuspendLayout();
             // 
             // tMainWindow
@@ -104,14 +118,73 @@
             // pgEffects
             // 
             this.pgEffects.BackColor = System.Drawing.SystemColors.Control;
+            this.pgEffects.Controls.Add(this.lstSoundEffects);
             this.pgEffects.Controls.Add(this.grpEffectsControls);
-            this.pgEffects.Controls.Add(this.datRegisteredEffects);
             this.pgEffects.Location = new System.Drawing.Point(4, 4);
             this.pgEffects.Name = "pgEffects";
             this.pgEffects.Padding = new System.Windows.Forms.Padding(3);
             this.pgEffects.Size = new System.Drawing.Size(1168, 412);
             this.pgEffects.TabIndex = 0;
             this.pgEffects.Text = "Registered Sound FX";
+            // 
+            // lstSoundEffects
+            // 
+            this.lstSoundEffects.AllColumns.Add(this.cSoundFXID);
+            this.lstSoundEffects.AllColumns.Add(this.cFilename);
+            this.lstSoundEffects.AllColumns.Add(this.cLength);
+            this.lstSoundEffects.AllColumns.Add(this.cMode);
+            this.lstSoundEffects.AllowColumnReorder = true;
+            this.lstSoundEffects.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lstSoundEffects.CellEditUseWholeCell = false;
+            this.lstSoundEffects.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.cSoundFXID,
+            this.cFilename,
+            this.cLength,
+            this.cMode});
+            this.lstSoundEffects.Cursor = System.Windows.Forms.Cursors.Default;
+            this.lstSoundEffects.FullRowSelect = true;
+            this.lstSoundEffects.Location = new System.Drawing.Point(102, 7);
+            this.lstSoundEffects.Name = "lstSoundEffects";
+            this.lstSoundEffects.Size = new System.Drawing.Size(1060, 399);
+            this.lstSoundEffects.TabIndex = 2;
+            this.lstSoundEffects.UseCompatibleStateImageBehavior = false;
+            this.lstSoundEffects.View = System.Windows.Forms.View.Details;
+            // 
+            // cSoundFXID
+            // 
+            this.cSoundFXID.AspectName = "SourceID";
+            this.cSoundFXID.Groupable = false;
+            this.cSoundFXID.MinimumWidth = 100;
+            this.cSoundFXID.Text = "Sound FX ID";
+            this.cSoundFXID.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.cSoundFXID.Width = 100;
+            // 
+            // cFilename
+            // 
+            this.cFilename.AspectName = "Filename";
+            this.cFilename.FillsFreeSpace = true;
+            this.cFilename.Text = "Filename";
+            // 
+            // cLength
+            // 
+            this.cLength.AspectName = "Length";
+            this.cLength.AspectToStringFormat = "{0:h\\:mm\\:ss\\.FFF}";
+            this.cLength.IsEditable = false;
+            this.cLength.MinimumWidth = 100;
+            this.cLength.Text = "Total Time";
+            this.cLength.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.cLength.Width = 100;
+            // 
+            // cMode
+            // 
+            this.cMode.AspectName = "CacheMode";
+            this.cMode.IsEditable = false;
+            this.cMode.MinimumWidth = 120;
+            this.cMode.Text = "Cached / Buffered";
+            this.cMode.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.cMode.Width = 120;
             // 
             // grpEffectsControls
             // 
@@ -166,78 +239,54 @@
             this.bAddEffect.UseVisualStyleBackColor = true;
             this.bAddEffect.Click += new System.EventHandler(this.bAddEffect_Click);
             // 
-            // datRegisteredEffects
-            // 
-            this.datRegisteredEffects.AllowUserToAddRows = false;
-            this.datRegisteredEffects.AllowUserToDeleteRows = false;
-            this.datRegisteredEffects.AllowUserToOrderColumns = true;
-            this.datRegisteredEffects.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.datRegisteredEffects.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-            this.datRegisteredEffects.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.datRegisteredEffects.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.SourceID,
-            this.Filename,
-            this.Length,
-            this.CacheMode});
-            this.datRegisteredEffects.Location = new System.Drawing.Point(102, 7);
-            this.datRegisteredEffects.Name = "datRegisteredEffects";
-            this.datRegisteredEffects.ReadOnly = true;
-            this.datRegisteredEffects.RowHeadersVisible = false;
-            this.datRegisteredEffects.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.datRegisteredEffects.Size = new System.Drawing.Size(1060, 399);
-            this.datRegisteredEffects.TabIndex = 0;
-            // 
-            // SourceID
-            // 
-            dataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle17.Format = "N0";
-            dataGridViewCellStyle17.NullValue = null;
-            this.SourceID.DefaultCellStyle = dataGridViewCellStyle17;
-            this.SourceID.HeaderText = "Sound FX ID";
-            this.SourceID.Name = "SourceID";
-            this.SourceID.ReadOnly = true;
-            this.SourceID.Width = 93;
-            // 
-            // Filename
-            // 
-            dataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            this.Filename.DefaultCellStyle = dataGridViewCellStyle18;
-            this.Filename.HeaderText = "Filename";
-            this.Filename.Name = "Filename";
-            this.Filename.ReadOnly = true;
-            this.Filename.Width = 74;
-            // 
-            // Length
-            // 
-            dataGridViewCellStyle19.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle19.Format = "h\\:mm\\:ss\\.FFF";
-            dataGridViewCellStyle19.NullValue = null;
-            this.Length.DefaultCellStyle = dataGridViewCellStyle19;
-            this.Length.HeaderText = "Total Time";
-            this.Length.Name = "Length";
-            this.Length.ReadOnly = true;
-            this.Length.Width = 82;
-            // 
-            // CacheMode
-            // 
-            dataGridViewCellStyle20.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.CacheMode.DefaultCellStyle = dataGridViewCellStyle20;
-            this.CacheMode.HeaderText = "Cached/Buffered";
-            this.CacheMode.Name = "CacheMode";
-            this.CacheMode.ReadOnly = true;
-            this.CacheMode.Width = 114;
-            // 
             // pgCues
             // 
             this.pgCues.BackColor = System.Drawing.SystemColors.Control;
+            this.pgCues.Controls.Add(this.gCues);
+            this.pgCues.Controls.Add(this.tCueList);
             this.pgCues.Location = new System.Drawing.Point(4, 4);
             this.pgCues.Name = "pgCues";
             this.pgCues.Padding = new System.Windows.Forms.Padding(3);
             this.pgCues.Size = new System.Drawing.Size(1168, 412);
             this.pgCues.TabIndex = 1;
             this.pgCues.Text = "Sound FX Cues";
+            // 
+            // tCueList
+            // 
+            this.tCueList.AllColumns.Add(this.cCueID);
+            this.tCueList.AllColumns.Add(this.cCueName);
+            this.tCueList.AllColumns.Add(this.cCueLength);
+            this.tCueList.AllColumns.Add(this.cCueSeekTo);
+            this.tCueList.AllColumns.Add(this.cFadeIn);
+            this.tCueList.AllColumns.Add(this.cFadeOut);
+            this.tCueList.AllColumns.Add(this.cFadeOutDuration);
+            this.tCueList.AllColumns.Add(this.cVolume);
+            this.tCueList.AllowColumnReorder = true;
+            this.tCueList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tCueList.CellEditUseWholeCell = false;
+            this.tCueList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.cCueID,
+            this.cCueName,
+            this.cCueLength,
+            this.cCueSeekTo,
+            this.cFadeIn,
+            this.cFadeOut,
+            this.cFadeOutDuration,
+            this.cVolume});
+            this.tCueList.Cursor = System.Windows.Forms.Cursors.Default;
+            this.tCueList.FullRowSelect = true;
+            this.tCueList.Location = new System.Drawing.Point(101, 7);
+            this.tCueList.MultiSelect = false;
+            this.tCueList.Name = "tCueList";
+            this.tCueList.ShowGroups = false;
+            this.tCueList.Size = new System.Drawing.Size(1061, 399);
+            this.tCueList.TabIndex = 0;
+            this.tCueList.UseCompatibleStateImageBehavior = false;
+            this.tCueList.UseNotifyPropertyChanged = true;
+            this.tCueList.View = System.Windows.Forms.View.Details;
+            this.tCueList.VirtualMode = true;
             // 
             // mbarMainMenu
             // 
@@ -530,6 +579,124 @@
             this.dlgSave.RestoreDirectory = true;
             this.dlgSave.SupportMultiDottedExtensions = true;
             // 
+            // gCues
+            // 
+            this.gCues.Controls.Add(this.bRemoveCue);
+            this.gCues.Controls.Add(this.bSequence);
+            this.gCues.Controls.Add(this.bCollection);
+            this.gCues.Controls.Add(this.bSoundFX);
+            this.gCues.Controls.Add(this.bSilence);
+            this.gCues.Location = new System.Drawing.Point(6, 6);
+            this.gCues.Name = "gCues";
+            this.gCues.Size = new System.Drawing.Size(89, 293);
+            this.gCues.TabIndex = 2;
+            this.gCues.TabStop = false;
+            this.gCues.Text = "Cues";
+            // 
+            // bSilence
+            // 
+            this.bSilence.Location = new System.Drawing.Point(7, 20);
+            this.bSilence.Name = "bSilence";
+            this.bSilence.Size = new System.Drawing.Size(75, 23);
+            this.bSilence.TabIndex = 0;
+            this.bSilence.Text = "Silence";
+            this.bSilence.UseVisualStyleBackColor = true;
+            this.bSilence.Click += new System.EventHandler(this.bSilence_Click);
+            // 
+            // bSoundFX
+            // 
+            this.bSoundFX.Location = new System.Drawing.Point(7, 50);
+            this.bSoundFX.Name = "bSoundFX";
+            this.bSoundFX.Size = new System.Drawing.Size(75, 23);
+            this.bSoundFX.TabIndex = 1;
+            this.bSoundFX.Text = "Sound FX";
+            this.bSoundFX.UseVisualStyleBackColor = true;
+            // 
+            // bCollection
+            // 
+            this.bCollection.Location = new System.Drawing.Point(7, 103);
+            this.bCollection.Name = "bCollection";
+            this.bCollection.Size = new System.Drawing.Size(75, 23);
+            this.bCollection.TabIndex = 2;
+            this.bCollection.Text = "Collection";
+            this.bCollection.UseVisualStyleBackColor = true;
+            this.bCollection.Click += new System.EventHandler(this.bCollection_Click);
+            // 
+            // bSequence
+            // 
+            this.bSequence.Location = new System.Drawing.Point(7, 133);
+            this.bSequence.Name = "bSequence";
+            this.bSequence.Size = new System.Drawing.Size(75, 23);
+            this.bSequence.TabIndex = 3;
+            this.bSequence.Text = "Sequence";
+            this.bSequence.UseVisualStyleBackColor = true;
+            this.bSequence.Click += new System.EventHandler(this.bSequence_Click);
+            // 
+            // bRemoveCue
+            // 
+            this.bRemoveCue.Location = new System.Drawing.Point(7, 191);
+            this.bRemoveCue.Name = "bRemoveCue";
+            this.bRemoveCue.Size = new System.Drawing.Size(75, 23);
+            this.bRemoveCue.TabIndex = 4;
+            this.bRemoveCue.Text = "Remove";
+            this.bRemoveCue.UseVisualStyleBackColor = true;
+            this.bRemoveCue.Click += new System.EventHandler(this.bRemoveCue_Click);
+            // 
+            // cCueID
+            // 
+            this.cCueID.AspectName = "CueID";
+            this.cCueID.IsVisible = false;
+            this.cCueID.Text = "Cue ID";
+            this.cCueID.Width = 100;
+            // 
+            // cCueName
+            // 
+            this.cCueName.AspectName = "Name";
+            this.cCueName.FillsFreeSpace = true;
+            this.cCueName.Text = "Name";
+            // 
+            // cCueLength
+            // 
+            this.cCueLength.AspectName = "Length";
+            this.cCueLength.MinimumWidth = 100;
+            this.cCueLength.Text = "Cue Length";
+            this.cCueLength.Width = 100;
+            // 
+            // cCueSeekTo
+            // 
+            this.cCueSeekTo.AspectName = "SeekTo";
+            this.cCueSeekTo.MinimumWidth = 100;
+            this.cCueSeekTo.Text = "Start Cue At";
+            this.cCueSeekTo.Width = 100;
+            // 
+            // cFadeIn
+            // 
+            this.cFadeIn.AspectName = "FadeInDuration";
+            this.cFadeIn.MinimumWidth = 100;
+            this.cFadeIn.Text = "Fade In Length";
+            this.cFadeIn.Width = 100;
+            // 
+            // cFadeOut
+            // 
+            this.cFadeOut.AspectName = "AutoFadeOutTime";
+            this.cFadeOut.MinimumWidth = 100;
+            this.cFadeOut.Text = "Fade Out At";
+            this.cFadeOut.Width = 100;
+            // 
+            // cFadeOutDuration
+            // 
+            this.cFadeOutDuration.AspectName = "FadeOutDuration";
+            this.cFadeOutDuration.MinimumWidth = 100;
+            this.cFadeOutDuration.Text = "Fade Out Length";
+            this.cFadeOutDuration.Width = 100;
+            // 
+            // cVolume
+            // 
+            this.cVolume.AspectName = "Volume";
+            this.cVolume.MinimumWidth = 80;
+            this.cVolume.Text = "Volume Adjust";
+            this.cVolume.Width = 80;
+            // 
             // frmPantomime
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -546,8 +713,10 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmPantomime_FormClosing);
             this.tMainWindow.ResumeLayout(false);
             this.pgEffects.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.lstSoundEffects)).EndInit();
             this.grpEffectsControls.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.datRegisteredEffects)).EndInit();
+            this.pgCues.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.tCueList)).EndInit();
             this.mbarMainMenu.ResumeLayout(false);
             this.mbarMainMenu.PerformLayout();
             this.grpPreshow.ResumeLayout(false);
@@ -556,6 +725,7 @@
             this.grpControls.ResumeLayout(false);
             this.sbarMainStatus.ResumeLayout(false);
             this.sbarMainStatus.PerformLayout();
+            this.gCues.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -591,14 +761,9 @@
         private System.Windows.Forms.StatusStrip sbarMainStatus;
         private System.Windows.Forms.ToolStripStatusLabel lblRunningTime;
         private System.Windows.Forms.ToolStripStatusLabel lblCurrentAction;
-        private System.Windows.Forms.DataGridView datRegisteredEffects;
         private System.Windows.Forms.OpenFileDialog dlgOpen;
         private System.Windows.Forms.Button bStartShow;
         private System.Windows.Forms.CheckBox chkSpecial;
-        private System.Windows.Forms.DataGridViewTextBoxColumn SourceID;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Filename;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Length;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CacheMode;
         private System.Windows.Forms.ToolStripStatusLabel lblShowRunTime;
         private System.Windows.Forms.ToolStripStatusLabel lblTotalTimeLabel;
         private System.Windows.Forms.Button bStopAll;
@@ -609,6 +774,26 @@
         private System.Windows.Forms.Button bRenumber;
         private System.Windows.Forms.Button bPlayNow;
         private System.Windows.Forms.SaveFileDialog dlgSave;
+        private BrightIdeasSoftware.TreeListView tCueList;
+        private BrightIdeasSoftware.ObjectListView lstSoundEffects;
+        private BrightIdeasSoftware.OLVColumn cSoundFXID;
+        private BrightIdeasSoftware.OLVColumn cFilename;
+        private BrightIdeasSoftware.OLVColumn cLength;
+        private BrightIdeasSoftware.OLVColumn cMode;
+        private System.Windows.Forms.GroupBox gCues;
+        private System.Windows.Forms.Button bSequence;
+        private System.Windows.Forms.Button bCollection;
+        private System.Windows.Forms.Button bSoundFX;
+        private System.Windows.Forms.Button bSilence;
+        private System.Windows.Forms.Button bRemoveCue;
+        private BrightIdeasSoftware.OLVColumn cCueID;
+        private BrightIdeasSoftware.OLVColumn cCueName;
+        private BrightIdeasSoftware.OLVColumn cCueLength;
+        private BrightIdeasSoftware.OLVColumn cCueSeekTo;
+        private BrightIdeasSoftware.OLVColumn cFadeIn;
+        private BrightIdeasSoftware.OLVColumn cFadeOut;
+        private BrightIdeasSoftware.OLVColumn cFadeOutDuration;
+        private BrightIdeasSoftware.OLVColumn cVolume;
     }
 }
 

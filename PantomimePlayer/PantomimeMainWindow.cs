@@ -16,11 +16,24 @@ using SFXPlayer;
 namespace PantomimePlayer {
 
     public partial class frmPantomime : Form, SFXPlayerGUI {
+        log4net.ILog logger = log4net.LogManager.GetLogger(typeof(frmPantomime));
 
         private SFXPlayerControl player;
 
         public frmPantomime() {
             InitializeComponent();
+            tCueList.CanExpandGetter = delegate (object o) {
+                return (o is CueGroup);
+            };
+            tCueList.ChildrenGetter = delegate (object o) {
+                CueGroup g = o as CueGroup;
+                return g.cueItems.Values;
+            };
+            tCueList.ParentGetter = delegate (object o) {
+                return player.currentShow.getParent(o as Cue);
+            };
+
+
             player = new SFXPlayerControl(this);
             cmbIntervalTime.Items.AddRange(Announcements.GetIntervalTimes());
             selectIntervalTime(IntervalTime.I20);
@@ -90,27 +103,55 @@ namespace PantomimePlayer {
             dlgSave.FileName = original.Name;
             if (dlgSave.ShowDialog() == DialogResult.OK) {
                 try {
-                    return original.CopyTo(dlgSave.FileName, true);
+                    if (original.FullName == dlgSave.FileName) return original; // don't copy over itself
+                    FileInfo nFile = new FileInfo(dlgSave.FileName);
+                    if (nFile.Exists) {
+                        try {
+                            deleteFile(nFile);
+                        } catch (IOException) {
+                            _displayMessage("Unable to save this sound over the existing file.", "Overwrite Failed");
+                            return original;
+                        }
+                    }
+                    FileInfo _result = original.CopyTo(dlgSave.FileName, true);
+                    _result.Attributes = FileAttributes.Normal;
+                    return _result;
                 } catch (Exception) {
-                    return null;
+                    return original;
                 }
             } else {
-                return null;
+                return original;
             }
         }
 
         public void addRegisteredEffect(RegisteredEffect row) {
-            lock (datRegisteredEffects_lock) {
-                datRegisteredEffects.Rows.Add(row.toRow());
+            lock (lstSoundEffects_lock) {
+                // datRegisteredEffects.Rows.Add(row.toRow());
+                lstSoundEffects.AddObject(row);
             }
         }
 
         public void updateRegisteredEffects() {
-            lock (datRegisteredEffects_lock) {
+            lock (lstSoundEffects_lock) {
+                foreach (RegisteredEffect r in player.currentShow.getRegisteredEffects()) lstSoundEffects.UpdateObject(r);
+                /*
                 datRegisteredEffects.Rows.Clear();
                 foreach (RegisteredEffect r in player.currentShow.getRegisteredEffects()) {
                     datRegisteredEffects.Rows.Add(r.toRow());
+                    lstSoundEffects.AddObject(r);
                 }
+                */
+            }
+        }
+
+        public void updateCues() {
+            lock (tCueList_lock) {
+                // tCueList.UpdateObject(player.currentShow.rootCues);
+                tCueList.ClearObjects();
+                foreach (Cue c in player.currentShow.getRootCues()) {
+                    tCueList.UpdateObject(c);
+                }
+                tCueList.ExpandAll();
             }
         }
 
@@ -227,10 +268,22 @@ namespace PantomimePlayer {
             }
         }
 
-        public object datRegisteredEffects_lock = new object();
+        public object lstSoundEffects_lock = new object();
+        public object tCueList_lock = new object();
 
         private void bRemoveEffect_Click(Object sender, EventArgs e) {
-            lock (datRegisteredEffects_lock) {
+            lock (lstSoundEffects_lock) {
+                var selected = lstSoundEffects.SelectedObjects;
+                foreach (RegisteredEffect eff in selected) {
+                    player.currentShow.updateEffect(eff.SourceID, null);
+                    lstSoundEffects.RemoveObject(eff);
+                    // TODO: Delete file being removed from local storage
+                    // logger.Debug("Deleting stored SFX: <" + eff.Filename + ">");
+                    // eff.fx.close();
+                    // deleteFile(new FileInfo(RegisteredEffect.getAbsolutePath(eff.Filename)));
+                }
+                // updateRegisteredEffects();
+                /*
                 if (datRegisteredEffects.SelectedRows.Count == 0) {
                     _displayMessage("Please select a row to remove first.", "No Row Selected");
                 } else {
@@ -249,11 +302,12 @@ namespace PantomimePlayer {
                         datRegisteredEffects.Rows.Remove(row);
                     }
                 }
+                */
             }
         }
 
         private void bRenumber_Click(Object sender, EventArgs e) {
-            lock (datRegisteredEffects_lock) {
+            lock (lstSoundEffects_lock) {
                 var effects = player.currentShow.getRegisteredEffects();
                 uint _nextEffect = 0;
                 long maxID = effects.Count - 1;
@@ -272,15 +326,21 @@ namespace PantomimePlayer {
         }
 
         private void bPlayNow_Click(Object sender, EventArgs e) {
-            lock (datRegisteredEffects_lock) {
-                if (datRegisteredEffects.SelectedRows.Count == 0) {
+            lock (lstSoundEffects_lock) {
+                System.Collections.IList selected = lstSoundEffects.SelectedObjects;
+                if (selected.Count == 0) {
                     _displayMessage("No cue selected to play.", "No Row Selected");
                 } else {
+                    List<RegisteredEffect> playlist = new List<RegisteredEffect>(selected.Count);
+                    foreach (object o in selected) playlist.Add((RegisteredEffect)o);
+                    player.onPlayCueCollection(playlist);
+                    /*
                     List<uint> idsToPlay = new List<uint>();
                     foreach (DataGridViewRow row in datRegisteredEffects.Rows) {
                         if (datRegisteredEffects.SelectedRows.Contains(row)) idsToPlay.Add((uint)row.Cells[0].Value);
                     }
                     player.onPlayCueCollection(idsToPlay);
+                    */
                 }
             }
         }
@@ -324,8 +384,71 @@ namespace PantomimePlayer {
         }
 
         private void deleteFile(FileInfo targetFile) {
-            targetFile.Attributes = FileAttributes.Normal;
-            targetFile.Delete();
+            if (targetFile.Exists) {
+                targetFile.Attributes = FileAttributes.Normal;
+                targetFile.Delete();
+            }
+        }
+
+        private uint _nextCueID = 0;
+        private uint getCueID() {
+            while (player.currentShow.isCue(_nextCueID)) _nextCueID++;
+            return _nextCueID;
+        }
+
+        private void insertCue(Cue c) {
+            player.currentShow.registerCue(c);
+            lock (tCueList_lock) {
+                object o = tCueList.SelectedObject;
+                if (o != null) {
+                    if (o is CueGroup) {
+                        // add the new object into the selected group (at the end)
+                        ((CueGroup)o).addElement(c);
+                        tCueList.UpdateObject(o);
+                    } else {
+                        CueGroup g = player.currentShow.getParent((Cue)o);
+                        g.insertAfter((Cue)o, c);
+                        if (g == player.currentShow.rootCues)
+                            updateCues();
+                        else tCueList.UpdateObject(g);
+                    }
+                } else {
+                    player.currentShow.rootCues.addElement(c);
+                    tCueList.AddObject(c);
+                }
+                if (c is CueGroup) tCueList.Expand(c);
+            }
+        }
+
+        private void bSilence_Click(Object sender, EventArgs e) {
+            SilenceCue c = new SilenceCue();
+            c.CueID = getCueID();
+            c.Length = SFXUtilities.TimeInSeconds(2);
+            insertCue(c);
+        }
+
+        private void bSequence_Click(Object sender, EventArgs e) {
+            CueGroup g = new CueGroup();
+            g.CueID = getCueID();
+            g.Type = GroupElementType.SEQUENCE;
+            insertCue(g);
+        }
+
+        private void bCollection_Click(Object sender, EventArgs e) {
+            CueGroup g = new CueGroup();
+            g.CueID = getCueID();
+            g.Type = GroupElementType.COLLECTION;
+            insertCue(g);
+        }
+
+        private void bRemoveCue_Click(Object sender, EventArgs e) {
+            lock (tCueList_lock) {
+                var selected = tCueList.SelectedObjects;
+                foreach (Cue c in selected) {
+                    player.currentShow.removeCue(c);
+                    tCueList.RemoveObject(c);
+                }
+            }
         }
     }
 }
