@@ -44,6 +44,10 @@ namespace SFXPlayer {
             this.fx = null;
         }
 
+        public override String ToString() {
+            return SourceID + " - " + Filename;
+        }
+
         public object[] toRow() {
             return new object[] {
                 SourceID, Filename, Length, CacheMode

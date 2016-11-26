@@ -11,6 +11,7 @@ using SFXEngine.AudioEngine.Effects;
 
 namespace SFXEngine.AudioEngine {
     public abstract class SoundFX : ISampleProvider {
+        log4net.ILog logger = log4net.LogManager.GetLogger(typeof(SoundFX));
 
         public bool isPlaying { get; protected set; }
         public bool isPaused { get; protected set; }
@@ -129,6 +130,7 @@ namespace SFXEngine.AudioEngine {
         public virtual bool stop() {
             lock (_play_lock) {
                 if (isPlaying) {
+                    logger.Debug("Stopping SoundFX");
                     isPlaying = false;
                     isStopped = true;
                     onStop.triggerEvent(this);

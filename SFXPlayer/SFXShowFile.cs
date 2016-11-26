@@ -133,7 +133,9 @@ namespace SFXPlayer {
                 rootCues = new CueGroup();
                 rootCues.CueID = 0;
                 rootCues.Name = "Show Cues";
+                rootCues.currentShow = this;
                 conn.InsertOrReplace(rootCues);
+                cueTable[0] = rootCues;
                 // TODO: Continue implementing the basic database structure
             }
         }
@@ -194,6 +196,7 @@ namespace SFXPlayer {
         private object cueTable_lock = new object();
 
         public bool isCue(uint cueID) {
+            if (cueID == 0) return true;
             lock (cueTable_lock) {
                 return cueTable.ContainsKey(cueID);
             }
@@ -230,9 +233,13 @@ namespace SFXPlayer {
         public void removeCue(Cue cue) {
             if (cue.CueID == 0) return; // don't delete the root cues list
             uint maxCue = (cueTable.Count == 0) ? 0 : cueTable.Keys.Max();
-            for (uint x = 0; x < maxCue; x++) {
+            foreach (var x in cueTable.Keys) {
                 Cue c = cueTable[x];
-                if ((c != null) && (c is CueGroup)) ((CueGroup)c).removeElement(c);
+                if ((c != null) && (c is CueGroup)) {
+                    ((CueGroup)c).removeElement(c);
+                    updateTable(c);
+                    c.NotifyPropertyChanged("Length");
+                }
             }
             cueTable.Remove(cue.CueID);
             if (cue is RegisteredCue) {
@@ -241,6 +248,10 @@ namespace SFXPlayer {
                 conn.Delete<SilenceCue>(cue.CueID);
             } else if (cue is CueGroup) {
                 conn.Delete<CueGroup>(cue.CueID);
+                foreach (var item in (cue as CueGroup).cueItems) {
+                    CueGroupElement elem = getElement(item.Key, cue.CueID, item.Value.CueID);
+                    if (elem.ElementID != null) conn.Delete<CueGroupElement>(elem);
+                }
             }
         }
 
@@ -263,25 +274,33 @@ namespace SFXPlayer {
             conn.InsertOrReplace(cue);
         }
 
+        private CueGroupElement getElement(uint sequence, uint cueID, uint itemID) {
+            CueGroupElement elem = new CueGroupElement();
+            elem.CueID = cueID;
+            elem.ItemSequence = sequence;
+            elem.ItemID = itemID;
+            long id = -1;
+            foreach (var i in conn.Table<CueGroupElement>()) {
+                if ((i.CueID == elem.CueID) && (i.ItemSequence == elem.ItemSequence)) {
+                    id = (long)i.ElementID;
+                    break;
+                }
+            }
+            if (id == -1) {
+                elem.ElementID = null;
+            } else {
+                elem.ElementID = (uint)id;
+            }
+            return elem;
+        }
+
         private void updateCueGroup(CueGroup cue) {
             conn.InsertOrReplace(cue);
             foreach (var item in cue.cueItems) {
-                CueGroupElement elem = new CueGroupElement();
-                elem.CueID = cue.CueID;
-                elem.ItemSequence = item.Key;
-                elem.ItemID = item.Value.CueID;
-                long id = -1;
-                foreach (var i in conn.Table<CueGroupElement>()) {
-                    if ((i.CueID == elem.CueID) && (i.ItemSequence == elem.ItemSequence)) {
-                        id = (long)i.ElementID;
-                        break;
-                    }
-                }
-                if (id == -1) {
-                    elem.ElementID = null;
+                CueGroupElement elem = getElement(item.Key, cue.CueID, item.Value.CueID);
+                if (elem.ElementID == null) {
                     conn.Insert(elem);
                 } else {
-                    elem.ElementID = (uint)id;
                     conn.InsertOrReplace(elem);
                 }
             }
@@ -298,7 +317,14 @@ namespace SFXPlayer {
 
         public RegisteredEffect getRegisteredEffect(uint regID) {
             lock (registeredEffects_lock) {
-                return registeredEffects[regID];
+                return isRegisteredEffect(regID) ? registeredEffects[regID] : null;
+            }
+        }
+
+        public uint getFirstEffect() {
+            lock (registeredEffects_lock) {
+                if (registeredEffects.Count == 0) return 0;
+                return registeredEffects.Keys.Min();
             }
         }
 

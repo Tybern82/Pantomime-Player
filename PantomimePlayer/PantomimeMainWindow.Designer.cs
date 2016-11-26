@@ -37,7 +37,21 @@
             this.bRemoveEffect = new System.Windows.Forms.Button();
             this.bAddEffect = new System.Windows.Forms.Button();
             this.pgCues = new System.Windows.Forms.TabPage();
+            this.gCues = new System.Windows.Forms.GroupBox();
+            this.bRemoveCue = new System.Windows.Forms.Button();
+            this.bSequence = new System.Windows.Forms.Button();
+            this.bCollection = new System.Windows.Forms.Button();
+            this.bSoundFX = new System.Windows.Forms.Button();
+            this.bSilence = new System.Windows.Forms.Button();
             this.tCueList = new BrightIdeasSoftware.TreeListView();
+            this.cCueID = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cCueName = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cCueLength = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cCueSeekTo = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cFadeIn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cFadeOut = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cFadeOutDuration = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cVolume = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.mbarMainMenu = new System.Windows.Forms.MenuStrip();
             this.mnuFile = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -71,32 +85,21 @@
             this.lblCurrentAction = new System.Windows.Forms.ToolStripStatusLabel();
             this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
             this.dlgSave = new System.Windows.Forms.SaveFileDialog();
-            this.gCues = new System.Windows.Forms.GroupBox();
-            this.bSilence = new System.Windows.Forms.Button();
-            this.bSoundFX = new System.Windows.Forms.Button();
-            this.bCollection = new System.Windows.Forms.Button();
-            this.bSequence = new System.Windows.Forms.Button();
-            this.bRemoveCue = new System.Windows.Forms.Button();
-            this.cCueID = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.cCueName = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.cCueLength = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.cCueSeekTo = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.cFadeIn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.cFadeOut = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.cFadeOutDuration = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.cVolume = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cSourceID = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.bPlayCue = new System.Windows.Forms.Button();
+            this.bFadeOut = new System.Windows.Forms.Button();
             this.tMainWindow.SuspendLayout();
             this.pgEffects.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lstSoundEffects)).BeginInit();
             this.grpEffectsControls.SuspendLayout();
             this.pgCues.SuspendLayout();
+            this.gCues.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tCueList)).BeginInit();
             this.mbarMainMenu.SuspendLayout();
             this.grpPreshow.SuspendLayout();
             this.grpInterval.SuspendLayout();
             this.grpControls.SuspendLayout();
             this.sbarMainStatus.SuspendLayout();
-            this.gCues.SuspendLayout();
             this.SuspendLayout();
             // 
             // tMainWindow
@@ -251,10 +254,75 @@
             this.pgCues.TabIndex = 1;
             this.pgCues.Text = "Sound FX Cues";
             // 
+            // gCues
+            // 
+            this.gCues.Controls.Add(this.bRemoveCue);
+            this.gCues.Controls.Add(this.bSequence);
+            this.gCues.Controls.Add(this.bCollection);
+            this.gCues.Controls.Add(this.bSoundFX);
+            this.gCues.Controls.Add(this.bSilence);
+            this.gCues.Location = new System.Drawing.Point(6, 6);
+            this.gCues.Name = "gCues";
+            this.gCues.Size = new System.Drawing.Size(89, 293);
+            this.gCues.TabIndex = 2;
+            this.gCues.TabStop = false;
+            this.gCues.Text = "Cues";
+            // 
+            // bRemoveCue
+            // 
+            this.bRemoveCue.Location = new System.Drawing.Point(7, 191);
+            this.bRemoveCue.Name = "bRemoveCue";
+            this.bRemoveCue.Size = new System.Drawing.Size(75, 23);
+            this.bRemoveCue.TabIndex = 4;
+            this.bRemoveCue.Text = "Remove";
+            this.bRemoveCue.UseVisualStyleBackColor = true;
+            this.bRemoveCue.Click += new System.EventHandler(this.bRemoveCue_Click);
+            // 
+            // bSequence
+            // 
+            this.bSequence.Location = new System.Drawing.Point(7, 133);
+            this.bSequence.Name = "bSequence";
+            this.bSequence.Size = new System.Drawing.Size(75, 23);
+            this.bSequence.TabIndex = 3;
+            this.bSequence.Text = "Sequence";
+            this.bSequence.UseVisualStyleBackColor = true;
+            this.bSequence.Click += new System.EventHandler(this.bSequence_Click);
+            // 
+            // bCollection
+            // 
+            this.bCollection.Location = new System.Drawing.Point(7, 103);
+            this.bCollection.Name = "bCollection";
+            this.bCollection.Size = new System.Drawing.Size(75, 23);
+            this.bCollection.TabIndex = 2;
+            this.bCollection.Text = "Collection";
+            this.bCollection.UseVisualStyleBackColor = true;
+            this.bCollection.Click += new System.EventHandler(this.bCollection_Click);
+            // 
+            // bSoundFX
+            // 
+            this.bSoundFX.Location = new System.Drawing.Point(7, 50);
+            this.bSoundFX.Name = "bSoundFX";
+            this.bSoundFX.Size = new System.Drawing.Size(75, 23);
+            this.bSoundFX.TabIndex = 1;
+            this.bSoundFX.Text = "Sound FX";
+            this.bSoundFX.UseVisualStyleBackColor = true;
+            this.bSoundFX.Click += new System.EventHandler(this.bSoundFX_Click);
+            // 
+            // bSilence
+            // 
+            this.bSilence.Location = new System.Drawing.Point(7, 20);
+            this.bSilence.Name = "bSilence";
+            this.bSilence.Size = new System.Drawing.Size(75, 23);
+            this.bSilence.TabIndex = 0;
+            this.bSilence.Text = "Silence";
+            this.bSilence.UseVisualStyleBackColor = true;
+            this.bSilence.Click += new System.EventHandler(this.bSilence_Click);
+            // 
             // tCueList
             // 
             this.tCueList.AllColumns.Add(this.cCueID);
             this.tCueList.AllColumns.Add(this.cCueName);
+            this.tCueList.AllColumns.Add(this.cSourceID);
             this.tCueList.AllColumns.Add(this.cCueLength);
             this.tCueList.AllColumns.Add(this.cCueSeekTo);
             this.tCueList.AllColumns.Add(this.cFadeIn);
@@ -265,10 +333,11 @@
             this.tCueList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tCueList.CellEditUseWholeCell = false;
+            this.tCueList.CellEditActivation = BrightIdeasSoftware.ObjectListView.CellEditActivateMode.DoubleClick;
             this.tCueList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.cCueID,
             this.cCueName,
+            this.cSourceID,
             this.cCueLength,
             this.cCueSeekTo,
             this.cFadeIn,
@@ -276,6 +345,7 @@
             this.cFadeOutDuration,
             this.cVolume});
             this.tCueList.Cursor = System.Windows.Forms.Cursors.Default;
+            this.tCueList.EmptyListMsg = "No Cues Recorded";
             this.tCueList.FullRowSelect = true;
             this.tCueList.Location = new System.Drawing.Point(101, 7);
             this.tCueList.MultiSelect = false;
@@ -287,6 +357,64 @@
             this.tCueList.UseNotifyPropertyChanged = true;
             this.tCueList.View = System.Windows.Forms.View.Details;
             this.tCueList.VirtualMode = true;
+            this.tCueList.CellEditFinishing += new BrightIdeasSoftware.CellEditEventHandler(this.tCueList_CellEditFinishing);
+            this.tCueList.CellEditStarting += new BrightIdeasSoftware.CellEditEventHandler(this.tCueList_CellEditStarting);
+            // 
+            // cCueID
+            // 
+            this.cCueID.AspectName = "CueID";
+            this.cCueID.IsEditable = false;
+            this.cCueID.IsVisible = false;
+            this.cCueID.Text = "Cue ID";
+            this.cCueID.Width = 100;
+            // 
+            // cCueName
+            // 
+            this.cCueName.AspectName = "Name";
+            this.cCueName.FillsFreeSpace = true;
+            this.cCueName.Text = "Name";
+            // 
+            // cCueLength
+            // 
+            this.cCueLength.AspectName = "Length";
+            this.cCueLength.MinimumWidth = 100;
+            this.cCueLength.Text = "Cue Length";
+            this.cCueLength.Width = 100;
+            // 
+            // cCueSeekTo
+            // 
+            this.cCueSeekTo.AspectName = "SeekTo";
+            this.cCueSeekTo.MinimumWidth = 100;
+            this.cCueSeekTo.Text = "Start Cue At";
+            this.cCueSeekTo.Width = 100;
+            // 
+            // cFadeIn
+            // 
+            this.cFadeIn.AspectName = "FadeInDuration";
+            this.cFadeIn.MinimumWidth = 100;
+            this.cFadeIn.Text = "Fade In Length";
+            this.cFadeIn.Width = 100;
+            // 
+            // cFadeOut
+            // 
+            this.cFadeOut.AspectName = "AutoFadeOutTime";
+            this.cFadeOut.MinimumWidth = 100;
+            this.cFadeOut.Text = "Fade Out At";
+            this.cFadeOut.Width = 100;
+            // 
+            // cFadeOutDuration
+            // 
+            this.cFadeOutDuration.AspectName = "FadeOutDuration";
+            this.cFadeOutDuration.MinimumWidth = 100;
+            this.cFadeOutDuration.Text = "Fade Out Length";
+            this.cFadeOutDuration.Width = 100;
+            // 
+            // cVolume
+            // 
+            this.cVolume.AspectName = "Volume";
+            this.cVolume.MinimumWidth = 80;
+            this.cVolume.Text = "Volume Adjust";
+            this.cVolume.Width = 80;
             // 
             // mbarMainMenu
             // 
@@ -499,6 +627,8 @@
             // 
             this.grpControls.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.grpControls.Controls.Add(this.bFadeOut);
+            this.grpControls.Controls.Add(this.bPlayCue);
             this.grpControls.Controls.Add(this.bStopAll);
             this.grpControls.Location = new System.Drawing.Point(731, 28);
             this.grpControls.Name = "grpControls";
@@ -579,123 +709,32 @@
             this.dlgSave.RestoreDirectory = true;
             this.dlgSave.SupportMultiDottedExtensions = true;
             // 
-            // gCues
+            // cSourceID
             // 
-            this.gCues.Controls.Add(this.bRemoveCue);
-            this.gCues.Controls.Add(this.bSequence);
-            this.gCues.Controls.Add(this.bCollection);
-            this.gCues.Controls.Add(this.bSoundFX);
-            this.gCues.Controls.Add(this.bSilence);
-            this.gCues.Location = new System.Drawing.Point(6, 6);
-            this.gCues.Name = "gCues";
-            this.gCues.Size = new System.Drawing.Size(89, 293);
-            this.gCues.TabIndex = 2;
-            this.gCues.TabStop = false;
-            this.gCues.Text = "Cues";
+            this.cSourceID.AspectName = "";
+            this.cSourceID.MinimumWidth = 80;
+            this.cSourceID.Text = "Source ID";
+            this.cSourceID.Width = 80;
             // 
-            // bSilence
+            // bPlayCue
             // 
-            this.bSilence.Location = new System.Drawing.Point(7, 20);
-            this.bSilence.Name = "bSilence";
-            this.bSilence.Size = new System.Drawing.Size(75, 23);
-            this.bSilence.TabIndex = 0;
-            this.bSilence.Text = "Silence";
-            this.bSilence.UseVisualStyleBackColor = true;
-            this.bSilence.Click += new System.EventHandler(this.bSilence_Click);
+            this.bPlayCue.Location = new System.Drawing.Point(87, 19);
+            this.bPlayCue.Name = "bPlayCue";
+            this.bPlayCue.Size = new System.Drawing.Size(75, 23);
+            this.bPlayCue.TabIndex = 1;
+            this.bPlayCue.Text = "Play Cue";
+            this.bPlayCue.UseVisualStyleBackColor = true;
+            this.bPlayCue.Click += new System.EventHandler(this.bPlayCue_Click);
             // 
-            // bSoundFX
+            // bFadeOut
             // 
-            this.bSoundFX.Location = new System.Drawing.Point(7, 50);
-            this.bSoundFX.Name = "bSoundFX";
-            this.bSoundFX.Size = new System.Drawing.Size(75, 23);
-            this.bSoundFX.TabIndex = 1;
-            this.bSoundFX.Text = "Sound FX";
-            this.bSoundFX.UseVisualStyleBackColor = true;
-            // 
-            // bCollection
-            // 
-            this.bCollection.Location = new System.Drawing.Point(7, 103);
-            this.bCollection.Name = "bCollection";
-            this.bCollection.Size = new System.Drawing.Size(75, 23);
-            this.bCollection.TabIndex = 2;
-            this.bCollection.Text = "Collection";
-            this.bCollection.UseVisualStyleBackColor = true;
-            this.bCollection.Click += new System.EventHandler(this.bCollection_Click);
-            // 
-            // bSequence
-            // 
-            this.bSequence.Location = new System.Drawing.Point(7, 133);
-            this.bSequence.Name = "bSequence";
-            this.bSequence.Size = new System.Drawing.Size(75, 23);
-            this.bSequence.TabIndex = 3;
-            this.bSequence.Text = "Sequence";
-            this.bSequence.UseVisualStyleBackColor = true;
-            this.bSequence.Click += new System.EventHandler(this.bSequence_Click);
-            // 
-            // bRemoveCue
-            // 
-            this.bRemoveCue.Location = new System.Drawing.Point(7, 191);
-            this.bRemoveCue.Name = "bRemoveCue";
-            this.bRemoveCue.Size = new System.Drawing.Size(75, 23);
-            this.bRemoveCue.TabIndex = 4;
-            this.bRemoveCue.Text = "Remove";
-            this.bRemoveCue.UseVisualStyleBackColor = true;
-            this.bRemoveCue.Click += new System.EventHandler(this.bRemoveCue_Click);
-            // 
-            // cCueID
-            // 
-            this.cCueID.AspectName = "CueID";
-            this.cCueID.IsVisible = false;
-            this.cCueID.Text = "Cue ID";
-            this.cCueID.Width = 100;
-            // 
-            // cCueName
-            // 
-            this.cCueName.AspectName = "Name";
-            this.cCueName.FillsFreeSpace = true;
-            this.cCueName.Text = "Name";
-            // 
-            // cCueLength
-            // 
-            this.cCueLength.AspectName = "Length";
-            this.cCueLength.MinimumWidth = 100;
-            this.cCueLength.Text = "Cue Length";
-            this.cCueLength.Width = 100;
-            // 
-            // cCueSeekTo
-            // 
-            this.cCueSeekTo.AspectName = "SeekTo";
-            this.cCueSeekTo.MinimumWidth = 100;
-            this.cCueSeekTo.Text = "Start Cue At";
-            this.cCueSeekTo.Width = 100;
-            // 
-            // cFadeIn
-            // 
-            this.cFadeIn.AspectName = "FadeInDuration";
-            this.cFadeIn.MinimumWidth = 100;
-            this.cFadeIn.Text = "Fade In Length";
-            this.cFadeIn.Width = 100;
-            // 
-            // cFadeOut
-            // 
-            this.cFadeOut.AspectName = "AutoFadeOutTime";
-            this.cFadeOut.MinimumWidth = 100;
-            this.cFadeOut.Text = "Fade Out At";
-            this.cFadeOut.Width = 100;
-            // 
-            // cFadeOutDuration
-            // 
-            this.cFadeOutDuration.AspectName = "FadeOutDuration";
-            this.cFadeOutDuration.MinimumWidth = 100;
-            this.cFadeOutDuration.Text = "Fade Out Length";
-            this.cFadeOutDuration.Width = 100;
-            // 
-            // cVolume
-            // 
-            this.cVolume.AspectName = "Volume";
-            this.cVolume.MinimumWidth = 80;
-            this.cVolume.Text = "Volume Adjust";
-            this.cVolume.Width = 80;
+            this.bFadeOut.Location = new System.Drawing.Point(168, 19);
+            this.bFadeOut.Name = "bFadeOut";
+            this.bFadeOut.Size = new System.Drawing.Size(75, 23);
+            this.bFadeOut.TabIndex = 2;
+            this.bFadeOut.Text = "Fade Out";
+            this.bFadeOut.UseVisualStyleBackColor = true;
+            this.bFadeOut.Click += new System.EventHandler(this.bFadeOut_Click);
             // 
             // frmPantomime
             // 
@@ -716,6 +755,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.lstSoundEffects)).EndInit();
             this.grpEffectsControls.ResumeLayout(false);
             this.pgCues.ResumeLayout(false);
+            this.gCues.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.tCueList)).EndInit();
             this.mbarMainMenu.ResumeLayout(false);
             this.mbarMainMenu.PerformLayout();
@@ -725,7 +765,6 @@
             this.grpControls.ResumeLayout(false);
             this.sbarMainStatus.ResumeLayout(false);
             this.sbarMainStatus.PerformLayout();
-            this.gCues.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -794,6 +833,9 @@
         private BrightIdeasSoftware.OLVColumn cFadeOut;
         private BrightIdeasSoftware.OLVColumn cFadeOutDuration;
         private BrightIdeasSoftware.OLVColumn cVolume;
+        private BrightIdeasSoftware.OLVColumn cSourceID;
+        private System.Windows.Forms.Button bPlayCue;
+        private System.Windows.Forms.Button bFadeOut;
     }
 }
 

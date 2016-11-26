@@ -8,6 +8,8 @@ using NAudio.Wave;
 
 namespace SFXEngine.AudioEngine.Adapters {
     public class FadeSampleProvider : ISampleProvider {
+        log4net.ILog logger = log4net.LogManager.GetLogger(typeof(FadeSampleProvider));
+
         enum FadeState {
             Silence,
             FadeIn,
@@ -51,6 +53,7 @@ namespace SFXEngine.AudioEngine.Adapters {
         }
 
         public void fadeIn(double durationInMillis) {
+            logger.Info("Fading in...");
             lock (source_lock) {
                 fadeSamplePosition = 0;
                 fadeSampleCount = (int)((durationInMillis * WaveFormat.SampleRate) / 1000);
@@ -63,6 +66,7 @@ namespace SFXEngine.AudioEngine.Adapters {
         }
 
         public void fadeOut(double durationInMillis) {
+            logger.Info("Fading out....");
             lock (source_lock) {
                 fadeSamplePosition = 0;
                 fadeSampleCount = (int)((durationInMillis * WaveFormat.SampleRate) / 1000);
@@ -72,7 +76,8 @@ namespace SFXEngine.AudioEngine.Adapters {
 
         public int Read(float[] buffer, int offset, int count) {
             int sourceSamplesRead = source.Read(buffer, offset, count);
-            if ((fadeState == FadeState.FullVolume) && (totalSamples + sourceSamplesRead > autoFadeOutSample)) {
+            logger.Debug("Samples read: [" + sourceSamplesRead + "]");
+            if ((fadeState == FadeState.FullVolume) && (totalSamples + sourceSamplesRead > autoFadeOutSample) && (autoFadeOutSample != 0)) {
                 // need to begin the fadeout
                 int unfadedSamples = (int)(autoFadeOutSample - totalSamples);
                 fadeOut();
@@ -90,6 +95,7 @@ namespace SFXEngine.AudioEngine.Adapters {
                     doFadeOut(buffer, offset, sourceSamplesRead);
                 } else if (fadeState == FadeState.Silence) {
                     doClearBuffer(buffer, offset, count);
+                    if (source is SoundFX) (source as SoundFX).stop();
                     return 0;
                 }
             }

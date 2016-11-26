@@ -27,10 +27,71 @@ namespace PantomimePlayer {
             };
             tCueList.ChildrenGetter = delegate (object o) {
                 CueGroup g = o as CueGroup;
-                return g.cueItems.Values;
+                return g.getChildren();
             };
             tCueList.ParentGetter = delegate (object o) {
                 return player.currentShow.getParent(o as Cue);
+            };
+            cCueName.AspectPutter = delegate (object row, object value) {
+                logger.Info("New Name: [" + value + "]");
+                (row as Cue).Name = value as string;
+                player.currentShow.updateTable(row as Cue);
+            };
+            cCueLength.AspectPutter = delegate (object row, object value) {
+                logger.Info("New Length: [" + value + "]");
+                TimeSpan ts = TimeSpan.Parse(value as string);
+                (row as Cue).Length = ts;
+                player.currentShow.updateTable(row as Cue);
+            };
+            cCueSeekTo.AspectPutter = delegate (object row, object value) {
+                logger.Info("New Seek To: [" + value + "]");
+                TimeSpan ts = TimeSpan.Parse(value as string);
+                (row as Cue).SeekTo = ts;
+                player.currentShow.updateTable(row as Cue);
+            };
+            cFadeIn.AspectPutter = delegate (object row, object value) {
+                logger.Info("New Fade In Length: [" + value + "]");
+                TimeSpan ts = TimeSpan.Parse(value as string);
+                (row as Cue).FadeInDuration = ts;
+                player.currentShow.updateTable(row as Cue);
+            };
+            cFadeOut.AspectPutter = delegate (object row, object value) {
+                logger.Info("New Fade Out: [" + value + "]");
+                TimeSpan ts = TimeSpan.Parse(value as string);
+                (row as Cue).AutoFadeOutTime = ts;
+                player.currentShow.updateTable(row as Cue);
+            };
+            cFadeOutDuration.AspectPutter = delegate (object row, object value) {
+                logger.Info("New Fade Out Length: [" + value + "]");
+                TimeSpan ts = TimeSpan.Parse(value as string);
+                (row as Cue).FadeOutDuration = ts;
+                player.currentShow.updateTable(row as Cue);
+            };
+            cVolume.AspectPutter = delegate (object row, object value) {
+                logger.Info("New Volume: [" + value + "]");
+                (row as Cue).Volume = (double)value;
+                player.currentShow.updateTable(row as Cue);
+            };
+            cSourceID.AspectGetter = delegate (object row) {
+                if (row is RegisteredCue) {
+                    return (row as RegisteredCue).SourceID;
+                } else {
+                    return 0;
+                }
+            };
+            cSourceID.AspectPutter = delegate (object row, object value) {
+                logger.Debug(row.GetType() + " - " + value);
+                if (value == null) return;
+                if (row is RegisteredCue) {
+                    logger.Info("New Source ID: [" + value + "]");
+                    RegisteredEffect eff = (value as RegisteredEffect);
+                    RegisteredCue cue = (row as RegisteredCue);
+                    RegisteredEffect oEffect = player.currentShow.getRegisteredEffect(cue.SourceID);
+                    if ((oEffect != null) && (cue.Name == oEffect.Filename))
+                        cue.Name = null;
+                    cue.SourceID = eff.SourceID;
+                    player.currentShow.updateTable(row as RegisteredCue);
+                }
             };
 
 
@@ -149,7 +210,7 @@ namespace PantomimePlayer {
                 // tCueList.UpdateObject(player.currentShow.rootCues);
                 tCueList.ClearObjects();
                 foreach (Cue c in player.currentShow.getRootCues()) {
-                    tCueList.UpdateObject(c);
+                    if (c != null) tCueList.UpdateObject(c);
                 }
                 tCueList.ExpandAll();
             }
@@ -227,7 +288,11 @@ namespace PantomimePlayer {
         }
 
         private void bStopAll_Click(Object sender, EventArgs e) {
-            player.onStopAll();
+            lock (runningCues_lock) {
+                player.onStopAll();
+                foreach (Cue cue in runningCues) cue.clearSource();
+                runningCues.Clear();
+            }
         }
 
         private void bEndShow_Click(Object sender, EventArgs e) {
@@ -390,14 +455,14 @@ namespace PantomimePlayer {
             }
         }
 
-        private uint _nextCueID = 0;
+        private uint _nextCueID = 1;
         private uint getCueID() {
             while (player.currentShow.isCue(_nextCueID)) _nextCueID++;
             return _nextCueID;
         }
 
         private void insertCue(Cue c) {
-            player.currentShow.registerCue(c);
+                player.currentShow.registerCue(c);
             lock (tCueList_lock) {
                 object o = tCueList.SelectedObject;
                 if (o != null) {
@@ -421,32 +486,103 @@ namespace PantomimePlayer {
         }
 
         private void bSilence_Click(Object sender, EventArgs e) {
-            SilenceCue c = new SilenceCue();
-            c.CueID = getCueID();
-            c.Length = SFXUtilities.TimeInSeconds(2);
-            insertCue(c);
+            lock (tCueList_lock) {
+                SilenceCue c = new SilenceCue();
+                c.CueID = getCueID();
+                c.Length = SFXUtilities.TimeInSeconds(2);
+                insertCue(c);
+            }
         }
 
         private void bSequence_Click(Object sender, EventArgs e) {
-            CueGroup g = new CueGroup();
-            g.CueID = getCueID();
-            g.Type = GroupElementType.SEQUENCE;
-            insertCue(g);
+            lock (tCueList_lock) {
+                CueGroup g = new CueGroup();
+                g.CueID = getCueID();
+                g.Type = GroupElementType.SEQUENCE;
+                insertCue(g);
+            }
         }
 
         private void bCollection_Click(Object sender, EventArgs e) {
-            CueGroup g = new CueGroup();
-            g.CueID = getCueID();
-            g.Type = GroupElementType.COLLECTION;
-            insertCue(g);
+            lock (tCueList_lock) {
+                CueGroup g = new CueGroup();
+                g.CueID = getCueID();
+                g.Type = GroupElementType.COLLECTION;
+                insertCue(g);
+            }
         }
 
         private void bRemoveCue_Click(Object sender, EventArgs e) {
             lock (tCueList_lock) {
                 var selected = tCueList.SelectedObjects;
                 foreach (Cue c in selected) {
+                    Cue parent = player.currentShow.getParent(c);
                     player.currentShow.removeCue(c);
-                    tCueList.RemoveObject(c);
+                    if (parent == player.currentShow.rootCues)
+                        tCueList.RemoveObject(c);
+                    else
+                        tCueList.RefreshObject(parent);
+                }
+            }
+        }
+
+        private void bSoundFX_Click(Object sender, EventArgs e) {
+            lock (tCueList_lock) {
+                RegisteredCue cue = new RegisteredCue();
+                cue.CueID = getCueID();
+                cue.SourceID = player.currentShow.getFirstEffect();
+                insertCue(cue);
+            }
+        }
+
+        private void tCueList_CellEditStarting(Object sender, BrightIdeasSoftware.CellEditEventArgs e) {
+            // Ignore edit events for other columns
+            if (e.Column != this.cSourceID)
+                return;
+
+            ComboBox cb = new ComboBox();
+            cb.Bounds = e.CellBounds;
+            cb.Font = ((BrightIdeasSoftware.TreeListView)sender).Font;
+            cb.DropDownStyle = ComboBoxStyle.DropDownList;
+            cb.Items.AddRange(player.currentShow.getRegisteredEffects().ToArray());
+            if (cb.Items.Count != 0) {
+                RegisteredEffect eff = player.currentShow.getRegisteredEffect((uint)e.Value);
+                if (eff != null) cb.SelectedItem = eff;
+                else cb.SelectedIndex = 0; // should select the entry that reflects the current value
+            }
+            e.Control = cb;
+        }
+
+        private void tCueList_CellEditFinishing(Object sender, BrightIdeasSoftware.CellEditEventArgs e) {
+            if (e.Column != this.cSourceID) return;
+
+            e.NewValue = ((ComboBox)e.Control).SelectedItem;
+        }
+
+        private void bPlayCue_Click(Object sender, EventArgs e) {
+            lock (tCueList_lock) {
+                var selected = tCueList.SelectedObjects;
+                lock (runningCues_lock) {
+                    foreach (Cue cue in selected) {
+                        runningCues.Add(cue);
+                        cue.onStop.addEventTrigger(delegate (SoundFX eventSource) {
+                            lock (runningCues_lock) {
+                                runningCues.Remove(cue);
+                            }
+                        });
+                        AudioPlaybackEngine.Instance.play(cue.source);
+                    }
+                }
+            }
+        }
+
+        private List<Cue> runningCues = new List<Cue>();
+        private object runningCues_lock = new object();
+
+        private void bFadeOut_Click(Object sender, EventArgs e) {
+            lock (runningCues_lock) {
+                foreach (Cue cue in runningCues) {
+                    cue.source.fadeOut();
                 }
             }
         }

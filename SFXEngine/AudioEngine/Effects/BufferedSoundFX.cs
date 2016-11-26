@@ -192,7 +192,7 @@ namespace SFXEngine.AudioEngine.Effects {
                             availableSamples = mainBuffer.Length - position;
                         }
                         if (availableSamples == 0) stop();  // we've loaded a new buffer, and still no samples, must be end of source stream
-                        var samplesToCopy = Math.Min(availableSamples, count);
+                        var samplesToCopy = Math.Min(availableSamples, count-samplesCopied);
                         Array.Copy(mainBuffer, position, buffer, offset + samplesCopied, samplesToCopy);
                         position += samplesToCopy;
                         totalPosition += samplesToCopy;

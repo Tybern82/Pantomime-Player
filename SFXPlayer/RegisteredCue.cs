@@ -9,6 +9,7 @@ using SFXEngine.AudioEngine;
 using SFXEngine.AudioEngine.Groups;
 using SFXEngine.AudioEngine.Effects;
 using SFXEngine.AudioEngine.Adapters;
+using SFXEngine.Events;
 
 using NAudio.Wave;
 
@@ -21,9 +22,13 @@ namespace SFXPlayer {
         // This method is called by the Set accessor of each property.
         // The CallerMemberName attribute that is applied to the optional propertyName
         // parameter causes the property name of the caller to be substituted as an argument.
-        protected void NotifyPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] String propertyName = "") {
+        public void NotifyPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] String propertyName = "") {
+            logger.Info("Property changed [" + propertyName + "]");
             PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
         }
+
+        [Ignore]
+        public SoundEventRegister onStop { get; private set; } = new SoundEventRegister();
 
         [Ignore]
         public SFXShowFile currentShow { get; set; }
@@ -95,6 +100,11 @@ namespace SFXPlayer {
             }
         }
         private FadeSampleProvider _source = null;
+        
+        public void clearSource() {
+            // Called to free the prepared source when the effect has completed playing
+            this._source = null;
+        }
 
         protected FadeSampleProvider prepareCue(SoundFX cue) {
             if (cue == null) return null;
@@ -110,7 +120,12 @@ namespace SFXPlayer {
                     logger.Error("Unable to complete seek on a stream - stream is unseekable, and the requested time is earlier than the current position.");
                 }
             }
-            ISampleProvider _result = cue;
+            SoundFX cachedCue = cue.cache();
+            cachedCue.onStop.addEventTrigger(delegate (SoundFX eventSource) {
+                clearSource();
+                onStop.triggerEvent(eventSource);   // trigger the cue events
+            });
+            ISampleProvider _result = cachedCue;
             if (Volume != 1.0) {
                 _result = new VolumeControlProvider(cue, Volume);
             }
@@ -139,11 +154,30 @@ namespace SFXPlayer {
 
         public override TimeSpan Length {
             get {
-                return (currentShow == null) ? base.Length : currentShow.getRegisteredEffect(SourceID).Length;
+                if (currentShow != null) {
+                    RegisteredEffect eff = currentShow.getRegisteredEffect(SourceID);
+                    if (eff != null) return eff.Length;
+                }
+                return base.Length;
             }
 
             set {
                 base.Length = value;
+            }
+        }
+
+        public override String Name {
+            get {
+                string _result = base.Name;
+                if ((base.Name == null) && (currentShow != null)) {
+                    RegisteredEffect eff = currentShow.getRegisteredEffect(SourceID);
+                    _result = (eff != null) ? eff.Filename : "";
+                }
+                return _result;
+            }
+
+            set {
+                base.Name = value;
             }
         }
 
@@ -195,13 +229,13 @@ namespace SFXPlayer {
                 switch (Type) {
                     case GroupElementType.COLLECTION:
                         foreach (var item in cueItems.Values) {
-                            if (_result < item.Length) _result = item.Length;
+                            if (item != null) if (_result < item.Length) _result = item.Length;
                         }
                         return _result;
 
                     case GroupElementType.SEQUENCE:
                         foreach (Cue c in cueItems.Values) {
-                            _result += c.Length;
+                            if (c != null) _result += c.Length;
                         }
                         return _result;
                     default:
@@ -223,6 +257,7 @@ namespace SFXPlayer {
         }
 
         public void addElement(uint sequence, Cue cue) {
+            if (cue == null) return;
             cueItems.Add(sequence, cue);
             currentShow?.updateTable(this);
             NotifyPropertyChanged("Length");
@@ -232,6 +267,14 @@ namespace SFXPlayer {
             uint nValue = getMaxCue();
             addElement(nValue, cue);
             return nValue;
+        }
+
+        public List<Cue> getChildren() {
+            List<Cue> _result = new List<Cue>();
+            foreach (var item in cueItems) {
+                _result.Add(item.Value);
+            }
+            return _result;
         }
 
         public long sequenceOf(Cue c) {
@@ -245,12 +288,15 @@ namespace SFXPlayer {
         }
 
         public void insertAt(uint nPos, Cue c) {
+            if (c == null) return;
             uint maxCue = getMaxCue();
             if (nPos <= maxCue) {
                 // need to move existing elements up
-                for (uint x = maxCue; x > nPos; x--) {
-                    cueItems[x + 1] = cueItems[x];
-                    cueItems.Remove(x);
+                for (uint x = maxCue; x >= nPos; x--) {
+                    if (cueItems.Keys.Contains(x)) {
+                        cueItems[x + 1] = cueItems[x];
+                        cueItems.Remove(x);
+                    }
                 }
             }
             cueItems[nPos] = c;
@@ -285,7 +331,7 @@ namespace SFXPlayer {
         public override SoundFX loadCue() {
             List<SoundFX> items = new List<SoundFX>();
             uint max = getMaxCue();
-            for (uint x = 0; x < max; x++) {
+            foreach (uint x in cueItems.Keys) { 
                 Cue c = cueItems[x];
                 if (c == null) logger.Error("Missing item from sequence...");
                 else {

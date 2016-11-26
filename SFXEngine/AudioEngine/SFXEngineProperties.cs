@@ -7,12 +7,12 @@ using System.IO;
 
 namespace SFXEngine.AudioEngine {
     public class SFXEngineProperties {
-        // Default maximum cache limit to 5 minute tracks
-        public static uint MaxCachedSoundSize { get; set; } = 5 * 60 * AudioPlaybackEngine.DefaultSampleRate * AudioPlaybackEngine.DefaultChannelCount;
+        // Default maximum cache limit to 3 minute tracks
+        public static uint MaxCachedSoundSize { get; set; } = 3 * 60 * AudioPlaybackEngine.DefaultSampleRate * AudioPlaybackEngine.DefaultChannelCount;
         // SoundFile cutoff cach size (will select BufferedSound once file passes either this or the MaxCachedSoundSize limit)
-        public static TimeSpan MaxCachedSoundFile { get; set; } = new TimeSpan(0, 3, 0);    // 3-minutes
-        // Default buffer size to 30 seconds (60 seconds of buffer in both main and secondary buffers)
-        public static uint AudioBufferSize { get; set; } = 30 * AudioPlaybackEngine.DefaultSampleRate * AudioPlaybackEngine.DefaultChannelCount;
+        public static TimeSpan MaxCachedSoundFile { get; set; } = new TimeSpan(0, 1, 0);    // 3-minutes
+        // Default buffer size to 10 seconds (20 seconds of buffer in both main and secondary buffers)
+        public static uint AudioBufferSize { get; set; } = 10 * AudioPlaybackEngine.DefaultSampleRate * AudioPlaybackEngine.DefaultChannelCount;
         // Maximum volume increase amount 
         public static double MaxVolume { get; set; } = 3;   // limit to no more than triple original volume
         
