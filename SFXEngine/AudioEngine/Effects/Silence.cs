@@ -68,23 +68,12 @@ namespace SFXEngine.AudioEngine.Effects {
             }
         }
 
-        public override Int32 Read(Single[] buffer, Int32 offset, Int32 count) {
-            lock (_play_lock) {
-                if (isPaused) {
-                    return readSilence(buffer, offset, count);
-                } else if (isStopped) return 0;
-                if (!isPlaying) {
-                    isPlaying = true;
-                    onPlay.triggerEvent(this);
-                }
-                var samplesAvailable = totalSamples - totalPosition;
-                var samplesRead = (int)Math.Min(samplesAvailable, count);
-                readSilence(buffer, offset, samplesRead);   // 'read' 0 data
-                if (samplesRead == 0) stop();
-                else onSample.triggerEvent(this);
-                totalPosition += samplesRead;
-                return samplesRead;
-            }
+        public override Int32 ReadSamples(Single[] buffer, Int32 offset, Int32 count) {
+            var samplesAvailable = totalSamples - totalPosition;
+            var samplesRead = (int)Math.Min(samplesAvailable, count);
+            readSilence(buffer, offset, samplesRead);   // read '0' samples to fill the buffer
+            totalPosition += samplesRead;
+            return samplesRead;
         }
     }
 }

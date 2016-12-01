@@ -20,9 +20,10 @@ namespace SFXEngine.AudioEngine.Effects {
         private int position = 0;
         private long totalPosition = 0;
 
+        private WaveFormat _WaveFormat;
         public override WaveFormat WaveFormat {
             get {
-                return source.WaveFormat;
+                return _WaveFormat;
             }
         }
 
@@ -58,6 +59,7 @@ namespace SFXEngine.AudioEngine.Effects {
                 this.canSeek = false;
             }
             this.source = source;
+            this._WaveFormat = source.WaveFormat;
         }
 
         public static void buffer(object obj) {
@@ -167,41 +169,28 @@ namespace SFXEngine.AudioEngine.Effects {
             return false;
         }
 
-        public override Int32 Read(Single[] buffer, Int32 offset, Int32 count) {
-            lock (_play_lock) {
-                if (isPaused) {
-                    return readSilence(buffer, offset, count);
-                } else if (isStopped) return 0;
-                if (!isPlaying) {
-                    isPlaying = true;
-                    onPlay.triggerEvent(this);
-                }
-                lock (mainBuffer_lock) {
-                    if (mainBuffer == null) loadMainBuffer();       // preload the first buffer
-                    if ((mainBuffer == null) || (mainBuffer.Length == 0)) {
-                        // no samples from the source... end of stream
-                        stop();
-                        return 0;
+        public override Int32 ReadSamples(Single[] buffer, Int32 offset, Int32 count) {
+            lock (mainBuffer_lock) {
+                if (mainBuffer == null) loadMainBuffer();       // preload an initial buffer of data
+                if ((mainBuffer == null) || (mainBuffer.Length == 0))   // still empty? must have no more data to read
+                    return 0;
+
+                int samplesCopied = 0;      // number of samples we have copied already (none yet...)
+                while (samplesCopied < count) { // loop because we may need to switch buffers more than once
+                    var availableSamples = mainBuffer.Length - position;    // number of samples left in the main buffer
+                    if (availableSamples == 0) {
+                        // no samples left in the buffer, try loading another buffer of data
+                        loadMainBuffer();
+                        if (mainBuffer != null) availableSamples = mainBuffer.Length - position;    // and recalculate the number of samples available
                     }
-                    int samplesCopied = 0;
-                    while (isPlaying && (samplesCopied < count)) {
-                        var availableSamples = mainBuffer.Length - position;
-                        if (availableSamples == 0) {
-                            // first try to load a new buffer
-                            loadMainBuffer();
-                            availableSamples = mainBuffer.Length - position;
-                        }
-                        if (availableSamples == 0) stop();  // we've loaded a new buffer, and still no samples, must be end of source stream
-                        var samplesToCopy = Math.Min(availableSamples, count-samplesCopied);
-                        Array.Copy(mainBuffer, position, buffer, offset + samplesCopied, samplesToCopy);
-                        position += samplesToCopy;
-                        totalPosition += samplesToCopy;
-                        samplesCopied += samplesToCopy;
-                    }
-                    if (samplesCopied == 0) stop();
-                    else onSample.triggerEvent(this);
-                    return samplesCopied;
+                    if (availableSamples == 0) return samplesCopied;    // no more data available to read, return what we've got
+                    var samplesToCopy = Math.Min(availableSamples, count - samplesCopied);  // minimum of available data, or amount still required
+                    if (samplesToCopy != 0) Array.Copy(mainBuffer, position, buffer, offset + samplesCopied, samplesToCopy);
+                    position += samplesToCopy;
+                    totalPosition += samplesToCopy;
+                    samplesCopied += samplesToCopy;
                 }
+                return samplesCopied;
             }
         }
     }

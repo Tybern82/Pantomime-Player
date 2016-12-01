@@ -20,29 +20,36 @@ namespace SFXEngine.Events {
     public class SoundEventRegister {
 
         private List<SoundEventCallback> triggers = new List<SoundEventCallback>();
+        private object triggers_lock = new object();
 
         public bool addEventTrigger(SoundEventCallback callback) {
-            if (!triggers.Contains(callback)) {
-                triggers.Add(callback);
-                return true;
-            } else {
-                return false;
+            lock (triggers_lock) {
+                if (!triggers.Contains(callback)) {
+                    triggers.Add(callback);
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
 
         public bool removeEventTrigger(SoundEventCallback callback) {
-            if (triggers.Contains(callback)) {
-                triggers.Remove(callback);
-                return true;
-            } else {
-                return false;
+            lock (triggers_lock) {
+                if (triggers.Contains(callback)) {
+                    triggers.Remove(callback);
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
 
         public void triggerEvent(SoundFX triggerSource) {
-            foreach (SoundEventCallback callback in triggers) {
-                SoundEventCallbackItem item = new SoundEventCallbackItem(callback, triggerSource);
-                ThreadPool.QueueUserWorkItem(eventCallback, item);
+            lock (triggers_lock) {
+                foreach (SoundEventCallback callback in triggers) {
+                    SoundEventCallbackItem item = new SoundEventCallbackItem(callback, triggerSource);
+                    ThreadPool.QueueUserWorkItem(eventCallback, item);
+                }
             }
         }
 

@@ -94,23 +94,12 @@ namespace SFXEngine.AudioEngine.Effects {
             }
         }
 
-        public override Int32 Read(Single[] buffer, Int32 offset, Int32 count) {
-            lock (_play_lock) {
-                if (isPaused) {
-                    return readSilence(buffer, offset, count);
-                } else if (isStopped) return 0;
-                if (!isPlaying) {
-                    isPlaying = true;
-                    onPlay.triggerEvent(this);
-                }
-                var availableSamples = this.audioData.Length - position;
-                if (availableSamples == 0) stop();
-                var samplesToCopy = Math.Min(availableSamples, count);
-                Array.Copy(this.audioData, position, buffer, offset, samplesToCopy);
-                position += samplesToCopy;                
-                onSample.triggerEvent(this);
-                return (int)samplesToCopy;
-            }
+        public override Int32 ReadSamples(Single[] buffer, Int32 offset, Int32 count) {
+            var availableSamples = audioData.Length - position;
+            var samplesToCopy = Math.Min(availableSamples, count);
+            if (samplesToCopy != 0) Array.Copy(audioData, position, buffer, offset, samplesToCopy);
+            position += samplesToCopy;
+            return samplesToCopy;
         }
     }
 }

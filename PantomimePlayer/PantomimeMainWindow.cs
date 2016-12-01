@@ -12,6 +12,7 @@ using System.Windows.Forms;
 
 using SFXEngine.AudioEngine.Effects;
 using SFXPlayer;
+using SFXPlayer.Cues;
 
 namespace PantomimePlayer {
 
@@ -27,54 +28,59 @@ namespace PantomimePlayer {
             };
             tCueList.ChildrenGetter = delegate (object o) {
                 CueGroup g = o as CueGroup;
-                return g.getChildren();
+                return g.children;
             };
             tCueList.ParentGetter = delegate (object o) {
-                return player.currentShow.getParent(o as Cue);
+                return player.currentShow.getParent(o as SFXCue);
             };
             cCueName.AspectPutter = delegate (object row, object value) {
                 logger.Info("New Name: [" + value + "]");
-                (row as Cue).Name = value as string;
-                player.currentShow.updateTable(row as Cue);
+                (row as SFXCue).Name = value as string;
+                player.currentShow.updateTable(row as SFXCue);
             };
             cCueLength.AspectPutter = delegate (object row, object value) {
                 logger.Info("New Length: [" + value + "]");
                 TimeSpan ts = TimeSpan.Parse(value as string);
-                (row as Cue).Length = ts;
-                player.currentShow.updateTable(row as Cue);
+                (row as SFXCue).Length = ts;
+                player.currentShow.updateTable(row as SFXCue);
             };
             cCueSeekTo.AspectPutter = delegate (object row, object value) {
                 logger.Info("New Seek To: [" + value + "]");
                 TimeSpan ts = TimeSpan.Parse(value as string);
-                (row as Cue).SeekTo = ts;
-                player.currentShow.updateTable(row as Cue);
+                (row as SFXCue).SeekTo = ts;
+                player.currentShow.updateTable(row as SFXCue);
             };
             cFadeIn.AspectPutter = delegate (object row, object value) {
                 logger.Info("New Fade In Length: [" + value + "]");
                 TimeSpan ts = TimeSpan.Parse(value as string);
-                (row as Cue).FadeInDuration = ts;
-                player.currentShow.updateTable(row as Cue);
+                (row as SFXCue).FadeInDuration = ts;
+                player.currentShow.updateTable(row as SFXCue);
+            };
+            cHasAutoFade.AspectPutter = delegate (object row, object value) {
+                logger.Info("Setting auto-fade: [" + value + "]");
+                (row as SFXCue).hasAutoFade = (bool)value;
+                player.currentShow.updateTable(row as SFXCue);
             };
             cFadeOut.AspectPutter = delegate (object row, object value) {
                 logger.Info("New Fade Out: [" + value + "]");
                 TimeSpan ts = TimeSpan.Parse(value as string);
-                (row as Cue).AutoFadeOutTime = ts;
-                player.currentShow.updateTable(row as Cue);
+                (row as SFXCue).AutoFadeOutAt = ts;
+                player.currentShow.updateTable(row as SFXCue);
             };
             cFadeOutDuration.AspectPutter = delegate (object row, object value) {
                 logger.Info("New Fade Out Length: [" + value + "]");
                 TimeSpan ts = TimeSpan.Parse(value as string);
-                (row as Cue).FadeOutDuration = ts;
-                player.currentShow.updateTable(row as Cue);
+                (row as SFXCue).FadeOutDuration = ts;
+                player.currentShow.updateTable(row as SFXCue);
             };
             cVolume.AspectPutter = delegate (object row, object value) {
                 logger.Info("New Volume: [" + value + "]");
-                (row as Cue).Volume = (double)value;
-                player.currentShow.updateTable(row as Cue);
+                (row as SFXCue).Volume = (double)value;
+                player.currentShow.updateTable(row as SFXCue);
             };
             cSourceID.AspectGetter = delegate (object row) {
-                if (row is RegisteredCue) {
-                    return (row as RegisteredCue).SourceID;
+                if (row is RegisteredEffectCue) {
+                    return (row as RegisteredEffectCue).SourceID;
                 } else {
                     return 0;
                 }
@@ -82,16 +88,20 @@ namespace PantomimePlayer {
             cSourceID.AspectPutter = delegate (object row, object value) {
                 logger.Debug(row.GetType() + " - " + value);
                 if (value == null) return;
-                if (row is RegisteredCue) {
+                if (row is RegisteredEffectCue) {
                     logger.Info("New Source ID: [" + value + "]");
                     RegisteredEffect eff = (value as RegisteredEffect);
-                    RegisteredCue cue = (row as RegisteredCue);
+                    RegisteredEffectCue cue = (row as RegisteredEffectCue);
                     RegisteredEffect oEffect = player.currentShow.getRegisteredEffect(cue.SourceID);
                     if ((oEffect != null) && (cue.Name == oEffect.Filename))
                         cue.Name = null;
                     cue.SourceID = eff.SourceID;
-                    player.currentShow.updateTable(row as RegisteredCue);
+                    player.currentShow.updateTable(row as RegisteredEffectCue);
                 }
+            };
+
+            cFilename.GroupKeyGetter = delegate (object row) {
+                return (row is RegisteredEffect) ? (row as RegisteredEffect).GroupingKey : "";
             };
 
 
@@ -107,6 +117,7 @@ namespace PantomimePlayer {
                 player.currentShow.showDetails.Organisation = "ZPAC Theatre";
                 player.currentShow.showDetails.FXDesign = "Jeff Sweeney";
             }
+            lstSoundEffects.Sort(cFilename, SortOrder.Ascending);
             dlg.Dispose();
         }
 
@@ -158,29 +169,47 @@ namespace PantomimePlayer {
             MessageBox.Show(msg, title);
         }
 
-        private FileInfo _saveSoundFile(DirectoryInfo baseDir, FileInfo original) {
+        private QueryResult _queryUser(string msg, string title) {
+            DialogResult _result = MessageBox.Show(msg, title, MessageBoxButtons.YesNoCancel);
+            switch (_result) {
+                case DialogResult.Yes: return QueryResult.YES;
+                case DialogResult.No: return QueryResult.NO;
+                default: return QueryResult.CANCEL;
+            }
+        }
+
+        private FileInfo _saveSoundFile(DirectoryInfo baseDir, FileInfo original, bool auto) {
             if (!original.Exists) return null;  // original file does not exist... cannot save it
-            dlgSave.InitialDirectory = baseDir.FullName;
-            dlgSave.FileName = original.Name;
-            if (dlgSave.ShowDialog() == DialogResult.OK) {
-                try {
-                    if (original.FullName == dlgSave.FileName) return original; // don't copy over itself
-                    FileInfo nFile = new FileInfo(dlgSave.FileName);
-                    if (nFile.Exists) {
-                        try {
-                            deleteFile(nFile);
-                        } catch (IOException) {
-                            _displayMessage("Unable to save this sound over the existing file.", "Overwrite Failed");
-                            return original;
-                        }
+            FileInfo nFile;
+            if (auto) {
+                nFile = new FileInfo(Path.Combine(baseDir.FullName, original.Name));
+            } else {
+                dlgSave.InitialDirectory = baseDir.FullName;
+                dlgSave.FileName = original.Name;
+                if (dlgSave.ShowDialog() == DialogResult.OK) {
+                    try {
+                        if (original.FullName == dlgSave.FileName) return original; // don't copy over itself
+                        nFile = new FileInfo(dlgSave.FileName);
+                    } catch (Exception) {
+                        return original;
                     }
-                    FileInfo _result = original.CopyTo(dlgSave.FileName, true);
-                    _result.Attributes = FileAttributes.Normal;
-                    return _result;
-                } catch (Exception) {
+                } else {
                     return original;
                 }
-            } else {
+            }
+            try {
+                if (nFile.Exists) {
+                    try {
+                        deleteFile(nFile);
+                    } catch (IOException) {
+                        _displayMessage("Unable to save this sound over the existing file.", "Overwrite Failed");
+                        return original;
+                    }
+                }
+                FileInfo _result = original.CopyTo(nFile.FullName, true);
+                _result.Attributes = FileAttributes.Normal;
+                return _result;
+            } catch (Exception) {
                 return original;
             }
         }
@@ -192,10 +221,24 @@ namespace PantomimePlayer {
             }
         }
 
+        public void clearAll() {
+            lock (lstSoundEffects_lock) {
+                lstSoundEffects.ClearObjects();
+            }
+            lock (tCueList_lock) {
+                tCueList.ClearObjects();
+            }
+        }
+
         public void updateRegisteredEffects() {
             lock (lstSoundEffects_lock) {
-                foreach (RegisteredEffect r in player.currentShow.getRegisteredEffects()) lstSoundEffects.UpdateObject(r);
+                lstSoundEffects.ClearObjects();
+                lstSoundEffects.SetObjects(player.currentShow.getRegisteredEffects());
+                lstSoundEffects.Sort(cFilename, SortOrder.Ascending);
                 /*
+                foreach (RegisteredEffect r in player.currentShow.getRegisteredEffects())
+                    lstSoundEffects.UpdateObject(r);
+                
                 datRegisteredEffects.Rows.Clear();
                 foreach (RegisteredEffect r in player.currentShow.getRegisteredEffects()) {
                     datRegisteredEffects.Rows.Add(r.toRow());
@@ -209,7 +252,7 @@ namespace PantomimePlayer {
             lock (tCueList_lock) {
                 // tCueList.UpdateObject(player.currentShow.rootCues);
                 tCueList.ClearObjects();
-                foreach (Cue c in player.currentShow.getRootCues()) {
+                foreach (SFXCue c in player.currentShow.getRootCues()) {
                     if (c != null) tCueList.UpdateObject(c);
                 }
                 tCueList.ExpandAll();
@@ -221,6 +264,12 @@ namespace PantomimePlayer {
         public DisplayMessage displayMessage {
             get {
                 return _displayMessage;
+            }
+        }
+
+        public QueryMessage queryUser {
+            get {
+                return _queryUser;
             }
         }
 
@@ -290,7 +339,7 @@ namespace PantomimePlayer {
         private void bStopAll_Click(Object sender, EventArgs e) {
             lock (runningCues_lock) {
                 player.onStopAll();
-                foreach (Cue cue in runningCues) cue.clearSource();
+                foreach (SFXCue cue in runningCues) cue.clearSource();
                 runningCues.Clear();
             }
         }
@@ -322,7 +371,7 @@ namespace PantomimePlayer {
         private void bAddEffect_Click(Object sender, EventArgs e) {
             if (dlgOpen.ShowDialog() == DialogResult.OK) {
                 string[] files = dlgOpen.FileNames;
-                foreach (string str in files) player.onRegisterEffect(str);
+                player.onRegisterEffect(files);
             }
         }
 
@@ -413,6 +462,7 @@ namespace PantomimePlayer {
         private void newToolStripMenuItem_Click(Object sender, EventArgs e) {
             fDialog.ShowNewFolderButton = true;
             if (fDialog.ShowDialog() == DialogResult.OK) {
+                player.onCloseFile();
                 DirectoryInfo dInfo = new DirectoryInfo(fDialog.SelectedPath);
                 if (isNotEmpty(dInfo)) {
                     var _result = MessageBox.Show("There are files in the requested location, do you want to overwrite them?\nSelect 'Yes' to overwrite, 'No' to open the existing show file or 'Cancel' to go back.", "Overwrite?", MessageBoxButtons.YesNoCancel);
@@ -461,8 +511,8 @@ namespace PantomimePlayer {
             return _nextCueID;
         }
 
-        private void insertCue(Cue c) {
-                player.currentShow.registerCue(c);
+        private void insertCue(SFXCue c) {
+            player.currentShow.registerCue(c);
             lock (tCueList_lock) {
                 object o = tCueList.SelectedObject;
                 if (o != null) {
@@ -471,8 +521,8 @@ namespace PantomimePlayer {
                         ((CueGroup)o).addElement(c);
                         tCueList.UpdateObject(o);
                     } else {
-                        CueGroup g = player.currentShow.getParent((Cue)o);
-                        g.insertAfter((Cue)o, c);
+                        CueGroup g = player.currentShow.getParent((SFXCue)o);
+                        g.insertAfter((SFXCue)o, c);
                         if (g == player.currentShow.rootCues)
                             updateCues();
                         else tCueList.UpdateObject(g);
@@ -515,10 +565,16 @@ namespace PantomimePlayer {
         private void bRemoveCue_Click(Object sender, EventArgs e) {
             lock (tCueList_lock) {
                 var selected = tCueList.SelectedObjects;
-                foreach (Cue c in selected) {
-                    Cue parent = player.currentShow.getParent(c);
+                foreach (SFXCue c in selected) {
+                    SFXCue parent = player.currentShow.getParent(c);
+                    SFXCue rootParent = player.currentShow.getParent(parent);
+                    while ((rootParent != player.currentShow.rootCues) && (rootParent != null)) {
+                        parent = rootParent;
+                        rootParent = player.currentShow.getParent(parent);
+                    }
                     player.currentShow.removeCue(c);
-                    if (parent == player.currentShow.rootCues)
+                    if (rootParent == null) 
+                    // if (parent == player.currentShow.rootCues)
                         tCueList.RemoveObject(c);
                     else
                         tCueList.RefreshObject(parent);
@@ -528,7 +584,7 @@ namespace PantomimePlayer {
 
         private void bSoundFX_Click(Object sender, EventArgs e) {
             lock (tCueList_lock) {
-                RegisteredCue cue = new RegisteredCue();
+                RegisteredEffectCue cue = new RegisteredEffectCue();
                 cue.CueID = getCueID();
                 cue.SourceID = player.currentShow.getFirstEffect();
                 insertCue(cue);
@@ -563,7 +619,7 @@ namespace PantomimePlayer {
             lock (tCueList_lock) {
                 var selected = tCueList.SelectedObjects;
                 lock (runningCues_lock) {
-                    foreach (Cue cue in selected) {
+                    foreach (SFXCue cue in selected) {
                         runningCues.Add(cue);
                         cue.onStop.addEventTrigger(delegate (SoundFX eventSource) {
                             lock (runningCues_lock) {
@@ -576,15 +632,30 @@ namespace PantomimePlayer {
             }
         }
 
-        private List<Cue> runningCues = new List<Cue>();
+        private List<SFXCue> runningCues = new List<SFXCue>();
         private object runningCues_lock = new object();
 
         private void bFadeOut_Click(Object sender, EventArgs e) {
             lock (runningCues_lock) {
-                foreach (Cue cue in runningCues) {
-                    cue.source.fadeOut();
+                foreach (SFXCue cue in runningCues) {
+                    cue.source.beginFadeOut();
                 }
             }
+        }
+
+        private void bSwitchMode_Click(Object sender, EventArgs e) {
+            lock(tCueList_lock) {
+                var selected = tCueList.SelectedObjects;
+                foreach (SFXCue c in selected) {
+                    if (c is CueGroup) (c as CueGroup).switchMode();
+                }
+            }
+        }
+
+        public SFXLoadingUI displayLoading() {
+            frmLoading loadUI = new frmLoading();
+            loadUI.Show(this);
+            return loadUI;
         }
     }
 }

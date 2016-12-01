@@ -131,32 +131,15 @@ namespace SFXEngine.AudioEngine.Groups {
             }
         }
 
-        public override Int32 Read(Single[] buffer, Int32 offset, Int32 count) {
-            lock (_play_lock) {
-                if (isPaused) {
-                    return readSilence(buffer, offset, count);
-                } else if (isStopped) return 0;
-                if (!isPlaying) {
-                    isPlaying = true;
-                    onPlay.triggerEvent(this);
-                }
-                if (currentFX >= samples.Count) {
-                    // there are no effects to play
-                    stop();
-                    return 0;
-                }
-                var samplesRead = 0;
-                while (samplesRead < count && currentFX < samples.Count) {
-                    var needed = count - samplesRead;
-                    var currRead = samples[currentFX].Read(buffer, offset+samplesRead, needed);
-                    samplesRead += currRead;
-                    if (currRead == 0) currentFX++;
-                }
-                if (samplesRead == 0) stop();
-                else onSample.triggerEvent(this);
-                position += samplesRead;
-                return samplesRead;
+        public override Int32 ReadSamples(Single[] buffer, Int32 offset, Int32 count) {
+            var samplesRead = 0;        // track how many samples have been loaded into the buffer
+            while ((samplesRead < count) && (currentFX < samples.Count)) {  // while we need more samples, and there are still sources available
+                var needed = count - samplesRead;   // determine how many samples are still required
+                var currRead = samples[currentFX].Read(buffer, offset+samplesRead, needed); // try to read that many samples from the next source
+                samplesRead += currRead;    // update the number of produced samples
+                if (currRead == 0) currentFX++; // move to the next source if we have exhausted this one
             }
+            return samplesRead; // return the number of samples successfully read
         }
     }
 }

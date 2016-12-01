@@ -11,11 +11,17 @@ using SFXEngine.AudioEngine.Effects;
 using SFXEngine.AudioEngine.Groups;
 
 namespace SFXPlayer {
-    public delegate void DisplayMessage(string message, string title);
-    public delegate FileInfo SaveFile(DirectoryInfo basePath, FileInfo original);
+    public enum QueryResult {
+        YES, NO, CANCEL
+    }
 
+    public delegate void DisplayMessage(string message, string title);
+    public delegate QueryResult QueryMessage(string message, string title);
+    public delegate FileInfo SaveFile(DirectoryInfo basePath, FileInfo original, bool auto);
+    
     public interface SFXPlayerGUI {
         DisplayMessage displayMessage { get; }
+        QueryMessage queryUser { get; }
         SaveFile saveSoundFile { get; }
 
         string actionStatusText { get; set; }
@@ -25,9 +31,17 @@ namespace SFXPlayer {
 
         bool enableShowTimer { get; set; }
 
+        SFXLoadingUI displayLoading();
+
+        void clearAll();                                // clears the current list of registered effects and cues in preparation for a new file
         void addRegisteredEffect(RegisteredEffect e);   // add a new entry to the effects table
         void updateRegisteredEffects();                 // do a complete update on the entire effects table
         void updateCues();                              // do a complete update on the entire cues table
+    }
+
+    public interface SFXLoadingUI {
+        void updateProgress(double progress);
+        void close();
     }
 
     public class SFXPlayerControl {
@@ -43,9 +57,15 @@ namespace SFXPlayer {
             get { return _currentShow; }
             set {
                 _currentShow = value;
-                SFXEngineProperties.ShowProperties = value.showDetails;
-                logger.Debug("Updating RelativeBase: <" + value.baseDirectory + ">");
-                SFXEngineProperties.RelativeBase = value.baseDirectory;
+                if (value != null) {
+                    SFXEngineProperties.ShowProperties = value.showDetails;
+                    logger.Debug("Updating RelativeBase: <" + value.baseDirectory + ">");
+                    SFXEngineProperties.RelativeBase = value.baseDirectory;
+                } else {
+                    SFXEngineProperties.ShowProperties = null;
+                    logger.Debug("Clearing RelativeBase");
+                    SFXEngineProperties.RelativeBase = null;
+                }
             }
         }
 
@@ -105,9 +125,23 @@ namespace SFXPlayer {
             gui.enableShowTimer = false;
         }
 
+        public List<long> onRegisterEffect(IEnumerable<string> filenames) {
+            List<long> _result = new List<long>();
+            QueryResult _auto = gui.queryUser("Save all files to default location?", "AutoSave?");
+            foreach (var fname in filenames) {
+                var id = _onRegisterEffect(fname, (_auto == QueryResult.YES));
+                if (id != -1) _result.Add(id);
+            }
+            return _result;
+        }
+
         public long onRegisterEffect(string filename) {
+            return _onRegisterEffect(filename, false);
+        }
+
+        private long _onRegisterEffect(string filename, bool auto) {
             try {
-                FileInfo sfxFile = gui.saveSoundFile(currentShow.soundsDirectory, new FileInfo(filename));
+                FileInfo sfxFile = gui.saveSoundFile(currentShow.soundsDirectory, new FileInfo(filename), auto);
                 if (sfxFile == null) {
                     gui.displayMessage("Unable to save this sound effect: <" + filename + ">", "Error");
                     return -1;
@@ -143,17 +177,25 @@ namespace SFXPlayer {
         public void onOpenFile(string filename) {
             logger.Info("onOpenFile: Requesting to open <" + filename + ">");
             onCloseFile();
+            SFXLoadingUI loadGUI = gui.displayLoading();
             SFXEngineProperties.RelativeBase = new DirectoryInfo(filename);
-            currentShow = new SFXShowFile(filename);
+            currentShow = new SFXShowFile(filename, loadGUI);
             currentShow.showDetails.onChange.addEventTrigger(updateShowName);
             gui.titleBarText = currentShow.showDetails.Name;
+            loadGUI.updateProgress(0.9);
             gui.updateRegisteredEffects();
+            loadGUI.updateProgress(1.0);
             gui.updateCues();
+            loadGUI.close();
         }
 
         public void onCloseFile() {
             onStopAll();
-            if (currentShow != null) currentShow.close();
+            gui.clearAll();
+            if (currentShow != null) {
+                currentShow.close();
+                currentShow = null;
+            }
         }
 
         public void onStopAll() {

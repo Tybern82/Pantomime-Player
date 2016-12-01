@@ -38,6 +38,7 @@
             this.bAddEffect = new System.Windows.Forms.Button();
             this.pgCues = new System.Windows.Forms.TabPage();
             this.gCues = new System.Windows.Forms.GroupBox();
+            this.bSwitchMode = new System.Windows.Forms.Button();
             this.bRemoveCue = new System.Windows.Forms.Button();
             this.bSequence = new System.Windows.Forms.Button();
             this.bCollection = new System.Windows.Forms.Button();
@@ -46,9 +47,11 @@
             this.tCueList = new BrightIdeasSoftware.TreeListView();
             this.cCueID = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.cCueName = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cSourceID = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.cCueLength = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.cCueSeekTo = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.cFadeIn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.cHasAutoFade = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.cFadeOut = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.cFadeOutDuration = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.cVolume = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
@@ -76,6 +79,8 @@
             this.grpInterval = new System.Windows.Forms.GroupBox();
             this.btnInterval = new System.Windows.Forms.Button();
             this.grpControls = new System.Windows.Forms.GroupBox();
+            this.bFadeOut = new System.Windows.Forms.Button();
+            this.bPlayCue = new System.Windows.Forms.Button();
             this.bStopAll = new System.Windows.Forms.Button();
             this.fDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.sbarMainStatus = new System.Windows.Forms.StatusStrip();
@@ -85,9 +90,6 @@
             this.lblCurrentAction = new System.Windows.Forms.ToolStripStatusLabel();
             this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
             this.dlgSave = new System.Windows.Forms.SaveFileDialog();
-            this.cSourceID = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.bPlayCue = new System.Windows.Forms.Button();
-            this.bFadeOut = new System.Windows.Forms.Button();
             this.tMainWindow.SuspendLayout();
             this.pgEffects.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lstSoundEffects)).BeginInit();
@@ -150,9 +152,13 @@
             this.lstSoundEffects.FullRowSelect = true;
             this.lstSoundEffects.Location = new System.Drawing.Point(102, 7);
             this.lstSoundEffects.Name = "lstSoundEffects";
+            this.lstSoundEffects.ShowItemCountOnGroups = true;
             this.lstSoundEffects.Size = new System.Drawing.Size(1060, 399);
+            this.lstSoundEffects.SortGroupItemsByPrimaryColumn = false;
+            this.lstSoundEffects.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.lstSoundEffects.TabIndex = 2;
             this.lstSoundEffects.UseCompatibleStateImageBehavior = false;
+            this.lstSoundEffects.UseNotifyPropertyChanged = true;
             this.lstSoundEffects.View = System.Windows.Forms.View.Details;
             // 
             // cSoundFXID
@@ -174,8 +180,10 @@
             // 
             this.cLength.AspectName = "Length";
             this.cLength.AspectToStringFormat = "{0:h\\:mm\\:ss\\.FFF}";
+            this.cLength.Groupable = false;
             this.cLength.IsEditable = false;
             this.cLength.MinimumWidth = 100;
+            this.cLength.Sortable = false;
             this.cLength.Text = "Total Time";
             this.cLength.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.cLength.Width = 100;
@@ -256,6 +264,7 @@
             // 
             // gCues
             // 
+            this.gCues.Controls.Add(this.bSwitchMode);
             this.gCues.Controls.Add(this.bRemoveCue);
             this.gCues.Controls.Add(this.bSequence);
             this.gCues.Controls.Add(this.bCollection);
@@ -268,9 +277,19 @@
             this.gCues.TabStop = false;
             this.gCues.Text = "Cues";
             // 
+            // bSwitchMode
+            // 
+            this.bSwitchMode.Location = new System.Drawing.Point(7, 163);
+            this.bSwitchMode.Name = "bSwitchMode";
+            this.bSwitchMode.Size = new System.Drawing.Size(75, 23);
+            this.bSwitchMode.TabIndex = 5;
+            this.bSwitchMode.Text = "Switch";
+            this.bSwitchMode.UseVisualStyleBackColor = true;
+            this.bSwitchMode.Click += new System.EventHandler(this.bSwitchMode_Click);
+            // 
             // bRemoveCue
             // 
-            this.bRemoveCue.Location = new System.Drawing.Point(7, 191);
+            this.bRemoveCue.Location = new System.Drawing.Point(6, 224);
             this.bRemoveCue.Name = "bRemoveCue";
             this.bRemoveCue.Size = new System.Drawing.Size(75, 23);
             this.bRemoveCue.TabIndex = 4;
@@ -326,6 +345,7 @@
             this.tCueList.AllColumns.Add(this.cCueLength);
             this.tCueList.AllColumns.Add(this.cCueSeekTo);
             this.tCueList.AllColumns.Add(this.cFadeIn);
+            this.tCueList.AllColumns.Add(this.cHasAutoFade);
             this.tCueList.AllColumns.Add(this.cFadeOut);
             this.tCueList.AllColumns.Add(this.cFadeOutDuration);
             this.tCueList.AllColumns.Add(this.cVolume);
@@ -334,6 +354,8 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tCueList.CellEditActivation = BrightIdeasSoftware.ObjectListView.CellEditActivateMode.DoubleClick;
+            this.tCueList.CellEditUseWholeCell = false;
+            this.tCueList.CheckedAspectName = "";
             this.tCueList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.cCueID,
             this.cCueName,
@@ -341,6 +363,7 @@
             this.cCueLength,
             this.cCueSeekTo,
             this.cFadeIn,
+            this.cHasAutoFade,
             this.cFadeOut,
             this.cFadeOutDuration,
             this.cVolume});
@@ -351,10 +374,12 @@
             this.tCueList.MultiSelect = false;
             this.tCueList.Name = "tCueList";
             this.tCueList.ShowGroups = false;
+            this.tCueList.ShowImagesOnSubItems = true;
             this.tCueList.Size = new System.Drawing.Size(1061, 399);
             this.tCueList.TabIndex = 0;
             this.tCueList.UseCompatibleStateImageBehavior = false;
             this.tCueList.UseNotifyPropertyChanged = true;
+            this.tCueList.UseSubItemCheckBoxes = true;
             this.tCueList.View = System.Windows.Forms.View.Details;
             this.tCueList.VirtualMode = true;
             this.tCueList.CellEditFinishing += new BrightIdeasSoftware.CellEditEventHandler(this.tCueList_CellEditFinishing);
@@ -374,9 +399,18 @@
             this.cCueName.FillsFreeSpace = true;
             this.cCueName.Text = "Name";
             // 
+            // cSourceID
+            // 
+            this.cSourceID.AspectName = "";
+            this.cSourceID.FillsFreeSpace = true;
+            this.cSourceID.MinimumWidth = 80;
+            this.cSourceID.Text = "Source ID";
+            this.cSourceID.Width = 80;
+            // 
             // cCueLength
             // 
             this.cCueLength.AspectName = "Length";
+            this.cCueLength.AspectToStringFormat = "{0:h\\:mm\\:ss\\.FFF}";
             this.cCueLength.MinimumWidth = 100;
             this.cCueLength.Text = "Cue Length";
             this.cCueLength.Width = 100;
@@ -384,6 +418,7 @@
             // cCueSeekTo
             // 
             this.cCueSeekTo.AspectName = "SeekTo";
+            this.cCueSeekTo.AspectToStringFormat = "{0:h\\:mm\\:ss\\.FFF}";
             this.cCueSeekTo.MinimumWidth = 100;
             this.cCueSeekTo.Text = "Start Cue At";
             this.cCueSeekTo.Width = 100;
@@ -391,13 +426,22 @@
             // cFadeIn
             // 
             this.cFadeIn.AspectName = "FadeInDuration";
+            this.cFadeIn.AspectToStringFormat = "{0:h\\:mm\\:ss\\.FFF}";
             this.cFadeIn.MinimumWidth = 100;
             this.cFadeIn.Text = "Fade In Length";
             this.cFadeIn.Width = 100;
             // 
+            // cHasAutoFade
+            // 
+            this.cHasAutoFade.AspectName = "hasAutoFade";
+            this.cHasAutoFade.AspectToStringFormat = "";
+            this.cHasAutoFade.CheckBoxes = true;
+            this.cHasAutoFade.Text = "Auto?";
+            // 
             // cFadeOut
             // 
-            this.cFadeOut.AspectName = "AutoFadeOutTime";
+            this.cFadeOut.AspectName = "AutoFadeOutAt";
+            this.cFadeOut.AspectToStringFormat = "{0:h\\:mm\\:ss\\.FFF}";
             this.cFadeOut.MinimumWidth = 100;
             this.cFadeOut.Text = "Fade Out At";
             this.cFadeOut.Width = 100;
@@ -405,6 +449,7 @@
             // cFadeOutDuration
             // 
             this.cFadeOutDuration.AspectName = "FadeOutDuration";
+            this.cFadeOutDuration.AspectToStringFormat = "{0:h\\:mm\\:ss\\.FFF}";
             this.cFadeOutDuration.MinimumWidth = 100;
             this.cFadeOutDuration.Text = "Fade Out Length";
             this.cFadeOutDuration.Width = 100;
@@ -412,6 +457,7 @@
             // cVolume
             // 
             this.cVolume.AspectName = "Volume";
+            this.cVolume.AspectToStringFormat = "{0:P}";
             this.cVolume.MinimumWidth = 80;
             this.cVolume.Text = "Volume Adjust";
             this.cVolume.Width = 80;
@@ -637,6 +683,26 @@
             this.grpControls.TabStop = false;
             this.grpControls.Text = "Cue Controls";
             // 
+            // bFadeOut
+            // 
+            this.bFadeOut.Location = new System.Drawing.Point(168, 19);
+            this.bFadeOut.Name = "bFadeOut";
+            this.bFadeOut.Size = new System.Drawing.Size(75, 23);
+            this.bFadeOut.TabIndex = 2;
+            this.bFadeOut.Text = "Fade Out";
+            this.bFadeOut.UseVisualStyleBackColor = true;
+            this.bFadeOut.Click += new System.EventHandler(this.bFadeOut_Click);
+            // 
+            // bPlayCue
+            // 
+            this.bPlayCue.Location = new System.Drawing.Point(87, 19);
+            this.bPlayCue.Name = "bPlayCue";
+            this.bPlayCue.Size = new System.Drawing.Size(75, 23);
+            this.bPlayCue.TabIndex = 1;
+            this.bPlayCue.Text = "Play Cue";
+            this.bPlayCue.UseVisualStyleBackColor = true;
+            this.bPlayCue.Click += new System.EventHandler(this.bPlayCue_Click);
+            // 
             // bStopAll
             // 
             this.bStopAll.Location = new System.Drawing.Point(6, 19);
@@ -708,33 +774,6 @@
             this.dlgSave.AddExtension = false;
             this.dlgSave.RestoreDirectory = true;
             this.dlgSave.SupportMultiDottedExtensions = true;
-            // 
-            // cSourceID
-            // 
-            this.cSourceID.AspectName = "";
-            this.cSourceID.MinimumWidth = 80;
-            this.cSourceID.Text = "Source ID";
-            this.cSourceID.Width = 80;
-            // 
-            // bPlayCue
-            // 
-            this.bPlayCue.Location = new System.Drawing.Point(87, 19);
-            this.bPlayCue.Name = "bPlayCue";
-            this.bPlayCue.Size = new System.Drawing.Size(75, 23);
-            this.bPlayCue.TabIndex = 1;
-            this.bPlayCue.Text = "Play Cue";
-            this.bPlayCue.UseVisualStyleBackColor = true;
-            this.bPlayCue.Click += new System.EventHandler(this.bPlayCue_Click);
-            // 
-            // bFadeOut
-            // 
-            this.bFadeOut.Location = new System.Drawing.Point(168, 19);
-            this.bFadeOut.Name = "bFadeOut";
-            this.bFadeOut.Size = new System.Drawing.Size(75, 23);
-            this.bFadeOut.TabIndex = 2;
-            this.bFadeOut.Text = "Fade Out";
-            this.bFadeOut.UseVisualStyleBackColor = true;
-            this.bFadeOut.Click += new System.EventHandler(this.bFadeOut_Click);
             // 
             // frmPantomime
             // 
@@ -836,6 +875,8 @@
         private BrightIdeasSoftware.OLVColumn cSourceID;
         private System.Windows.Forms.Button bPlayCue;
         private System.Windows.Forms.Button bFadeOut;
+        private System.Windows.Forms.Button bSwitchMode;
+        private BrightIdeasSoftware.OLVColumn cHasAutoFade;
     }
 }
 

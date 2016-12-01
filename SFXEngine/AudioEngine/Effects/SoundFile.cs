@@ -109,20 +109,8 @@ namespace SFXEngine.AudioEngine.Effects {
             }
         }
 
-        public override Int32 Read(Single[] buffer, Int32 offset, Int32 count) {
-            lock (_play_lock) {
-                if (isPaused) {
-                    return readSilence(buffer, offset, count);
-                } else if (isStopped) return 0;
-                if (!isPlaying) {
-                    isPlaying = true;
-                    onPlay.triggerEvent(this);
-                }
-                int _result = readerSample.Read(buffer, offset, count);
-                if (_result == 0) stop();
-                else onSample.triggerEvent(this);
-                return _result;
-            }
+        public override Int32 ReadSamples(Single[] buffer, Int32 offset, Int32 count) {
+            return readerSample.Read(buffer, offset, count);
         }
 
         public void Dispose() {

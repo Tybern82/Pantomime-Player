@@ -67,17 +67,17 @@ namespace SFXEngine.AudioEngine.Groups {
             return seekTo(sampleIndex);
         }
 
-        public override Int32 Read(Single[] buffer, Int32 offset, Int32 count) {
+        public override Int32 ReadSamples(Single[] buffer, Int32 offset, Int32 count) {
             var samplesRead = source.Read(buffer, offset, count);
             // Loop to support the possibility of very short sources (ie requested 100 samples from a source of only 3...)
             while (samplesRead < count) {
-                bool justReset = false;
-                if (samplesRead == 0) {
-                    source.reset();
-                    justReset = true;
+                bool justReset = false;     // marker to detect whether a double-reset is issued
+                if (samplesRead == 0) {     // we didn't get any samples, time to reset the source
+                    source.reset();         // reset and...
+                    justReset = true;       // ... record it
                 }
-                samplesRead += source.Read(buffer, offset + samplesRead, count - samplesRead);
-                if (justReset && (samplesRead == 0)) break; // should not ever be unable to read immediately following a reset, (no audio in source?)
+                samplesRead += source.Read(buffer, offset + samplesRead, count - samplesRead);  // try reading again
+                if (justReset && (samplesRead == 0)) break; // should NEVER be unable to read immediately following a reset, (no audio in source?)
             }
             return samplesRead;
         }

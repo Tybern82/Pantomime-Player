@@ -19,25 +19,32 @@ namespace SFXEngine.Events {
     public class PropertyEventRegister {
 
         private List<PropertyEventCallback> triggers = new List<PropertyEventCallback>();
+        private object triggers_lock = new object();
 
         public bool addEventTrigger(PropertyEventCallback callback) {
-            if (!triggers.Contains(callback)) {
-                triggers.Add(callback);
-                return true;
-            } else return false;
+            lock (triggers_lock) {
+                if (!triggers.Contains(callback)) {
+                    triggers.Add(callback);
+                    return true;
+                } else return false;
+            }
         }
 
         public bool removeEventTrigger(PropertyEventCallback callback) {
-            if (triggers.Contains(callback)) {
-                triggers.Remove(callback);
-                return true;
-            } else return false;
+            lock (triggers_lock) {
+                if (triggers.Contains(callback)) {
+                    triggers.Remove(callback);
+                    return true;
+                } else return false;
+            }
         }
 
         public void triggerEvent(string property, object nValue) {
-            foreach (PropertyEventCallback callback in triggers) {
-                PropertyEventCallbackItem item = new PropertyEventCallbackItem(callback, property, nValue);
-                ThreadPool.QueueUserWorkItem(propertyCallback, item);
+            lock (triggers_lock) {
+                foreach (PropertyEventCallback callback in triggers) {
+                    PropertyEventCallbackItem item = new PropertyEventCallbackItem(callback, property, nValue);
+                    ThreadPool.QueueUserWorkItem(propertyCallback, item);
+                }
             }
         }
 

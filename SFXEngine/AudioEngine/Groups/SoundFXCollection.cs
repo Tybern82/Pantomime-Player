@@ -182,21 +182,10 @@ namespace SFXEngine.AudioEngine.Groups {
             return null;
         }
 
-        public override Int32 Read(Single[] buffer, Int32 offset, Int32 count) {
-            lock (_play_lock) {
-                if (isPaused) {
-                    return readSilence(buffer, offset, count);
-                } else if (isStopped) return 0;
-                if (!isPlaying) {
-                    isPlaying = true;
-                    onPlay.triggerEvent(this);
-                }
-                var samplesRead = mixer.Read(buffer, offset, count);
-                if (samplesRead == 0) stop();
-                else onSample.triggerEvent(this);
-                position += samplesRead;
-                return samplesRead;
-            }
+        public override Int32 ReadSamples(Single[] buffer, Int32 offset, Int32 count) {
+            var samplesRead = mixer.Read(buffer, offset, count);
+            position += samplesRead;
+            return samplesRead;
         }
     }
 }
