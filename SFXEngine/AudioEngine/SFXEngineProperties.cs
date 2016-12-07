@@ -14,7 +14,7 @@ namespace SFXEngine.AudioEngine {
         // Default buffer size to 10 seconds (20 seconds of buffer in both main and secondary buffers)
         public static uint AudioBufferSize { get; set; } = 10 * AudioPlaybackEngine.DefaultSampleRate * AudioPlaybackEngine.DefaultChannelCount;
         // Maximum volume increase amount 
-        public static double MaxVolume { get; set; } = 3;   // limit to no more than triple original volume
+        public static double MaxVolume { get; set; } = 10;   // limit to no more than triple original volume
         
         public static SFXProperties ShowProperties { private get; set; }
         public static DirectoryInfo RelativeBase { get; set; }

@@ -21,104 +21,115 @@ namespace PantomimePlayer {
 
         private SFXPlayerControl player;
 
+        private object _gui_lock = new object();    // lock to ensure the GUI is fully loaded before use
+
         public frmPantomime() {
-            InitializeComponent();
-            tCueList.CanExpandGetter = delegate (object o) {
-                return (o is CueGroup);
-            };
-            tCueList.ChildrenGetter = delegate (object o) {
-                CueGroup g = o as CueGroup;
-                return g.children;
-            };
-            tCueList.ParentGetter = delegate (object o) {
-                return player.currentShow.getParent(o as SFXCue);
-            };
-            cCueName.AspectPutter = delegate (object row, object value) {
-                logger.Info("New Name: [" + value + "]");
-                (row as SFXCue).Name = value as string;
-                player.currentShow.updateTable(row as SFXCue);
-            };
-            cCueLength.AspectPutter = delegate (object row, object value) {
-                logger.Info("New Length: [" + value + "]");
-                TimeSpan ts = TimeSpan.Parse(value as string);
-                (row as SFXCue).Length = ts;
-                player.currentShow.updateTable(row as SFXCue);
-            };
-            cCueSeekTo.AspectPutter = delegate (object row, object value) {
-                logger.Info("New Seek To: [" + value + "]");
-                TimeSpan ts = TimeSpan.Parse(value as string);
-                (row as SFXCue).SeekTo = ts;
-                player.currentShow.updateTable(row as SFXCue);
-            };
-            cFadeIn.AspectPutter = delegate (object row, object value) {
-                logger.Info("New Fade In Length: [" + value + "]");
-                TimeSpan ts = TimeSpan.Parse(value as string);
-                (row as SFXCue).FadeInDuration = ts;
-                player.currentShow.updateTable(row as SFXCue);
-            };
-            cHasAutoFade.AspectPutter = delegate (object row, object value) {
-                logger.Info("Setting auto-fade: [" + value + "]");
-                (row as SFXCue).hasAutoFade = (bool)value;
-                player.currentShow.updateTable(row as SFXCue);
-            };
-            cFadeOut.AspectPutter = delegate (object row, object value) {
-                logger.Info("New Fade Out: [" + value + "]");
-                TimeSpan ts = TimeSpan.Parse(value as string);
-                (row as SFXCue).AutoFadeOutAt = ts;
-                player.currentShow.updateTable(row as SFXCue);
-            };
-            cFadeOutDuration.AspectPutter = delegate (object row, object value) {
-                logger.Info("New Fade Out Length: [" + value + "]");
-                TimeSpan ts = TimeSpan.Parse(value as string);
-                (row as SFXCue).FadeOutDuration = ts;
-                player.currentShow.updateTable(row as SFXCue);
-            };
-            cVolume.AspectPutter = delegate (object row, object value) {
-                logger.Info("New Volume: [" + value + "]");
-                (row as SFXCue).Volume = (double)value;
-                player.currentShow.updateTable(row as SFXCue);
-            };
-            cSourceID.AspectGetter = delegate (object row) {
-                if (row is RegisteredEffectCue) {
-                    return (row as RegisteredEffectCue).SourceID;
-                } else {
-                    return 0;
+            lock (_gui_lock) {
+                InitializeComponent();
+                tCueList.CanExpandGetter = delegate (object o) {
+                    return (o is CueGroup);
+                };
+                tCueList.ChildrenGetter = delegate (object o) {
+                    CueGroup g = o as CueGroup;
+                    return g.children;
+                };
+                tCueList.ParentGetter = delegate (object o) {
+                    return player.currentShow.getParent(o as SFXCue);
+                };
+                cCueName.AspectPutter = delegate (object row, object value) {
+                    logger.Info("New Name: [" + value + "]");
+                    (row as SFXCue).Name = value as string;
+                    player.currentShow.updateTable(row as SFXCue);
+                };
+                cCueLength.AspectPutter = delegate (object row, object value) {
+                    logger.Info("New Length: [" + value + "]");
+                    TimeSpan ts = TimeSpan.Parse(value as string);
+                    (row as SFXCue).Length = ts;
+                    player.currentShow.updateTable(row as SFXCue);
+                };
+                cCueSeekTo.AspectPutter = delegate (object row, object value) {
+                    logger.Info("New Seek To: [" + value + "]");
+                    TimeSpan ts = TimeSpan.Parse(value as string);
+                    (row as SFXCue).SeekTo = ts;
+                    player.currentShow.updateTable(row as SFXCue);
+                };
+                cFadeIn.AspectPutter = delegate (object row, object value) {
+                    logger.Info("New Fade In Length: [" + value + "]");
+                    TimeSpan ts = TimeSpan.Parse(value as string);
+                    (row as SFXCue).FadeInDuration = ts;
+                    player.currentShow.updateTable(row as SFXCue);
+                };
+                cHasAutoFade.AspectPutter = delegate (object row, object value) {
+                    logger.Info("Setting auto-fade: [" + value + "]");
+                    (row as SFXCue).hasAutoFade = (bool)value;
+                    player.currentShow.updateTable(row as SFXCue);
+                };
+                cFadeOut.AspectPutter = delegate (object row, object value) {
+                    logger.Info("New Fade Out: [" + value + "]");
+                    TimeSpan ts = TimeSpan.Parse(value as string);
+                    (row as SFXCue).AutoFadeOutAt = ts;
+                    player.currentShow.updateTable(row as SFXCue);
+                };
+                cFadeOutDuration.AspectPutter = delegate (object row, object value) {
+                    logger.Info("New Fade Out Length: [" + value + "]");
+                    TimeSpan ts = TimeSpan.Parse(value as string);
+                    (row as SFXCue).FadeOutDuration = ts;
+                    player.currentShow.updateTable(row as SFXCue);
+                };
+                cVolume.AspectPutter = delegate (object row, object value) {
+                    logger.Info("New Volume: [" + value + "]");
+                    (row as SFXCue).Volume = (double)value;
+                    player.currentShow.updateTable(row as SFXCue);
+                };
+                cSourceID.AspectGetter = delegate (object row) {
+                    if (row is RegisteredEffectCue) {
+                        return (row as RegisteredEffectCue).SourceID;
+                    } else {
+                        return 0;
+                    }
+                };
+                cSourceID.AspectPutter = delegate (object row, object value) {
+                    logger.Debug(row.GetType() + " - " + value);
+                    if (value == null) return;
+                    if (row is RegisteredEffectCue) {
+                        logger.Info("New Source ID: [" + value + "]");
+                        RegisteredEffect eff = (value as RegisteredEffect);
+                        RegisteredEffectCue cue = (row as RegisteredEffectCue);
+                        RegisteredEffect oEffect = player.currentShow.getRegisteredEffect(cue.SourceID);
+                        if ((oEffect != null) && (cue.Name == oEffect.Filename))
+                            cue.Name = null;
+                        cue.SourceID = eff.SourceID;
+                        player.currentShow.updateTable(row as RegisteredEffectCue);
+                    }
+                };
+
+                cFilename.GroupKeyGetter = delegate (object row) {
+                    return (row is RegisteredEffect) ? (row as RegisteredEffect).GroupingKey : "";
+                };
+
+
+                player = new SFXPlayerControl(this);
+                cmbIntervalTime.Items.AddRange(Announcements.GetIntervalTimes());
+                selectIntervalTime(IntervalTime.I20);
+                TS_Tick = new TimeSpan(0, 0, 0, 0, tShow.Interval);
+                frmInitialLoad dlg = new frmInitialLoad();
+                if (dlg.ShowDialog() != DialogResult.OK) this.DialogResult = DialogResult.Abort;
+                else {
+                    System.Threading.ThreadPool.QueueUserWorkItem(loadInitial, dlg.SelectedShow.FullName);
                 }
-            };
-            cSourceID.AspectPutter = delegate (object row, object value) {
-                logger.Debug(row.GetType() + " - " + value);
-                if (value == null) return;
-                if (row is RegisteredEffectCue) {
-                    logger.Info("New Source ID: [" + value + "]");
-                    RegisteredEffect eff = (value as RegisteredEffect);
-                    RegisteredEffectCue cue = (row as RegisteredEffectCue);
-                    RegisteredEffect oEffect = player.currentShow.getRegisteredEffect(cue.SourceID);
-                    if ((oEffect != null) && (cue.Name == oEffect.Filename))
-                        cue.Name = null;
-                    cue.SourceID = eff.SourceID;
-                    player.currentShow.updateTable(row as RegisteredEffectCue);
-                }
-            };
+                lstSoundEffects.Sort(cFilename, SortOrder.Ascending);
+                dlg.Dispose();
+            }
+        }
 
-            cFilename.GroupKeyGetter = delegate (object row) {
-                return (row is RegisteredEffect) ? (row as RegisteredEffect).GroupingKey : "";
-            };
-
-
-            player = new SFXPlayerControl(this);
-            cmbIntervalTime.Items.AddRange(Announcements.GetIntervalTimes());
-            selectIntervalTime(IntervalTime.I20);
-            TS_Tick = new TimeSpan(0, 0, 0, 0, tShow.Interval);
-            frmInitialLoad dlg = new frmInitialLoad();
-            if (dlg.ShowDialog() != DialogResult.OK) this.DialogResult = DialogResult.Abort;
-            else {
-                player.onOpenFile(dlg.SelectedShow.FullName);
+        private void loadInitial(object o) {
+            lock (_gui_lock) {
+                string showName = (o != null) ? (string)o : "";
+                player.onOpenFile(showName);
                 player.currentShow.showDetails.Name = "1001 Arabian Nights... and a Matinee";
                 player.currentShow.showDetails.Organisation = "ZPAC Theatre";
                 player.currentShow.showDetails.FXDesign = "Jeff Sweeney";
             }
-            lstSoundEffects.Sort(cFilename, SortOrder.Ascending);
-            dlg.Dispose();
         }
 
         private void selectIntervalTime(IntervalTime i) {
@@ -255,7 +266,7 @@ namespace PantomimePlayer {
                 foreach (SFXCue c in player.currentShow.getRootCues()) {
                     if (c != null) tCueList.UpdateObject(c);
                 }
-                tCueList.ExpandAll();
+                this.Invoke(new Action(() => tCueList.ExpandAll()));
             }
         }
 
@@ -626,6 +637,9 @@ namespace PantomimePlayer {
                                 runningCues.Remove(cue);
                             }
                         });
+                        actionStatusText = cue.Name;
+                        cue.source.onSample.addEventTrigger(player.updateStatusTimer);
+                        cue.source.onStop.addEventTrigger(player.statusTimerComplete);
                         AudioPlaybackEngine.Instance.play(cue.source);
                     }
                 }
@@ -654,7 +668,7 @@ namespace PantomimePlayer {
 
         public SFXLoadingUI displayLoading() {
             frmLoading loadUI = new frmLoading();
-            loadUI.Show(this);
+            loadUI.Show();
             return loadUI;
         }
     }

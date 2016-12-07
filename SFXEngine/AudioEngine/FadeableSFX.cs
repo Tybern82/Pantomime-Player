@@ -41,6 +41,11 @@ namespace SFXEngine.AudioEngine {
          */
         TimeSpan AutoFadeOutAt { get; set; }
 
+        /**
+         * Duration of the track remaining to be played, taking into account the automatic fade out and current play position.
+         */
+        TimeSpan playLengthRemaining { get; }
+
 
         /**
          * Trigger the start of a fade-in of this source.

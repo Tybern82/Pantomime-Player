@@ -28,7 +28,7 @@
     <ProductName>SFXPlayer-v0.1-1001Nights</ProductName>
     <PublisherName>Jeff Sweeney</PublisherName>
     <SuiteName>ZPAC Theatre Technical Department Apps</SuiteName>
-    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationRevision>4</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>

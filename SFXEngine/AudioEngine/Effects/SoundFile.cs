@@ -104,6 +104,7 @@ namespace SFXEngine.AudioEngine.Effects {
         public override Boolean seekTo(TimeSpan index) {
             lock (_play_lock) {
                 source.CurrentTime = index;
+                currentSample = (long)Math.Round(index.TotalSeconds * WaveFormat.SampleRate * WaveFormat.Channels, MidpointRounding.ToEven);
                 onSeek.triggerEvent(this);
                 return true;
             }

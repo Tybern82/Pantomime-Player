@@ -72,7 +72,7 @@ namespace SFXEngine.AudioEngine.Groups {
                     samples.Add(SFXUtilities.ConvertSampleFormat(fx, WaveFormat));
                     if (!fx.canSeek) canSeek = false;
                     if (!fx.canDuplicate) canDuplicate = false;
-                    this.length += fx.length;
+                    this.length += fx.playLengthRemaining;
                 }
             }
         }
@@ -85,7 +85,7 @@ namespace SFXEngine.AudioEngine.Groups {
                     effects.Remove(fx);
                     samples.RemoveAt(index);
                     if ((!fx.canDuplicate) || (!fx.canSeek)) updateInfo();
-                    this.length -= fx.length;
+                    this.length -= fx.playLengthRemaining;
                 }
             }
         }
@@ -94,9 +94,11 @@ namespace SFXEngine.AudioEngine.Groups {
             lock (_play_lock) {
                 canSeek = true;
                 canDuplicate = true;
+                this.length = TimeSpan.Zero;
                 foreach (SoundFX fx in effects) {
                     if (!fx.canDuplicate) canDuplicate = false;
                     if (!fx.canSeek) canSeek = false;
+                    length += fx.playLengthRemaining;
                 }
             }
         }

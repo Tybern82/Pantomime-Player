@@ -174,6 +174,23 @@ namespace SFXPlayer {
             AudioPlaybackEngine.Instance.play(fx);
         }
 
+        public void onPlayCueCollection(IEnumerable<RegisteredEffect> cueList) {
+            SoundFXCollection cueCollection = new SoundFXCollection();
+            foreach (RegisteredEffect e in cueList) {
+                cueCollection.addSoundFX(e.fx.dup());
+            }
+            /*
+            foreach (uint i in cueList) {
+                RegisteredEffect e = currentShow.getRegisteredEffect(i);
+                if (e != null) cueCollection.addSoundFX(e.fx.dup());
+            }
+            */
+            gui.actionStatusText = "Selected cues...";
+            cueCollection.onSample.addEventTrigger(updateStatusTimer);
+            cueCollection.onStop.addEventTrigger(statusTimerComplete);
+            AudioPlaybackEngine.Instance.play(cueCollection);
+        }
+
         public void onOpenFile(string filename) {
             logger.Info("onOpenFile: Requesting to open <" + filename + ">");
             onCloseFile();
@@ -208,29 +225,14 @@ namespace SFXPlayer {
             return true;
         }
 
-        public void onPlayCueCollection(IEnumerable<RegisteredEffect> cueList) {
-            SoundFXCollection cueCollection = new SoundFXCollection();
-            foreach (RegisteredEffect e in cueList) {
-                cueCollection.addSoundFX(e.fx.dup());
-            }
-            /*
-            foreach (uint i in cueList) {
-                RegisteredEffect e = currentShow.getRegisteredEffect(i);
-                if (e != null) cueCollection.addSoundFX(e.fx.dup());
-            }
-            */
-            gui.actionStatusText = "Selected cues...";
-            cueCollection.onSample.addEventTrigger(updateStatusTimer);
-            cueCollection.onStop.addEventTrigger(statusTimerComplete);
-            AudioPlaybackEngine.Instance.play(cueCollection);
-        }
-
         public void updateEffectNumber(uint oNumber, uint nNumber) {
             // TODO: Modify current references to the old index, to match the new index.
         }
 
         public void updateStatusTimer(SoundFX fx) {
-            TimeSpan time = fx.length - fx.currentTime + TS_1Second;
+            TimeSpan time = fx.playLengthRemaining;
+            // TimeSpan endTime = (fx.hasAutoFade ? fx.AutoFadeOutAt + fx.FadeOutDuration : fx.length);
+            // TimeSpan time = endTime - fx.currentTime + TS_1Second;
             string timeStr;
             if (fx.length == TimeSpan.Zero) {
                 timeStr = "--:--";

@@ -20,7 +20,7 @@ namespace SFXEngine.AudioEngine.Groups {
             }
         }
 
-        private int position;
+        private long position;
         public override Int64 currentSample {
             get {
                 return position;
@@ -72,7 +72,7 @@ namespace SFXEngine.AudioEngine.Groups {
                     effects.Add(fx);
                     if (!fx.canSeek) canSeek = false;
                     if (!fx.canDuplicate) canDuplicate = false;
-                    if (fx.length > length) length = fx.length;
+                    if (fx.playLengthRemaining > length) length = fx.playLengthRemaining;
                     registerMixerInput(fx);
                 }
             }
@@ -83,7 +83,8 @@ namespace SFXEngine.AudioEngine.Groups {
                 if (effects.Contains(fx)) {
                     effects.Remove(fx);
                     unregisterMixerInput(fx);
-                    if ((!fx.canDuplicate) || (!fx.canSeek) || (fx.length == length)) updateInfo();
+                    if ((!fx.canDuplicate) || (!fx.canSeek) /*|| (fx.playLengthRemaining == length)*/)
+                        updateInfo();
                 }
             }
         }
@@ -116,7 +117,7 @@ namespace SFXEngine.AudioEngine.Groups {
                 foreach (SoundFX fx in effects) {
                     if (!fx.canDuplicate) canDuplicate = false;
                     if (!fx.canSeek) canSeek = false;
-                    if (fx.length > length) length = fx.length;
+                    if (fx.playLengthRemaining > length) length = fx.playLengthRemaining;
                 }
             }
         }
@@ -127,6 +128,7 @@ namespace SFXEngine.AudioEngine.Groups {
                 foreach (SoundFX fx in effects) {
                     _result &= fx.seekForward(sampleLength);
                 }
+                position += sampleLength;
                 if (_result) onSeek.triggerEvent(this);
                 return _result;
             }
@@ -138,6 +140,7 @@ namespace SFXEngine.AudioEngine.Groups {
                 foreach (SoundFX fx in effects) {
                     _result &= fx.seekForward(ts);
                 }
+                position += (long)Math.Round(ts.TotalSeconds * WaveFormat.SampleRate * WaveFormat.Channels, MidpointRounding.ToEven);
                 if (_result) onSeek.triggerEvent(this);
                 return _result;
             }
@@ -150,6 +153,7 @@ namespace SFXEngine.AudioEngine.Groups {
                     foreach (SoundFX fx in effects) {
                         _result &= fx.seekTo(sampleIndex);
                     }
+                    position = sampleIndex;
                     if (_result) onSeek.triggerEvent(this);
                     return _result;
                 }
@@ -164,6 +168,7 @@ namespace SFXEngine.AudioEngine.Groups {
                     foreach (SoundFX fx in effects) {
                         _result &= fx.seekTo(index);
                     }
+                    position = (long)Math.Round(index.TotalSeconds * WaveFormat.SampleRate * WaveFormat.Channels, MidpointRounding.ToEven);
                     if (_result) onSeek.triggerEvent(this);
                     return _result;
                 }

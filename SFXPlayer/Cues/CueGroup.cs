@@ -81,6 +81,7 @@ namespace SFXPlayer.Cues {
         public override string Name {
             get {
                 lock (_CueGroup_lock) {
+                    if (base.Name != null) return base.Name;
                     switch (Type) {
                         case GroupElementType.COLLECTION: return "Collection";  // Identify as a simultaneous collection of cues
                         case GroupElementType.SEQUENCE: return "Sequence";      // Identify as a sequence of cues
@@ -128,8 +129,8 @@ namespace SFXPlayer.Cues {
                             lock (_cueItems_lock) {
                                 foreach (var item in cueItems.Values) {
                                     if (item != null)                   // Not looking at a null item (just in case....)...
-                                        if (_result < item.Length)      // ... and it's longer than we have seen already...
-                                            _result = item.Length;      // ... so update our longest element to the new item.
+                                        if (_result < item.PlayLength)      // ... and it's longer than we have seen already...
+                                            _result = item.PlayLength;      // ... so update our longest element to the new item.
                                 }
                             }
                             break;
@@ -140,7 +141,7 @@ namespace SFXPlayer.Cues {
                             lock (_cueItems_lock) {
                                 foreach (SFXCue c in cueItems.Values) {
                                     if (c != null)              // Not looking at a null item (just in case....)...
-                                        _result += c.Length;    // ... add in it's length to the running total.
+                                        _result += c.PlayLength;    // ... add in it's length to the running total.
                                 }
                             }
                             break;
@@ -155,9 +156,9 @@ namespace SFXPlayer.Cues {
         /**
          * Retrieve the current list of child elements stored in this cue group.
          */
-        private List<SFXCue> _children = null;
-        private PropertyEventCallback clearChildren = null;
-        private object _children_lock = new object();
+        // private List<SFXCue> _children = null;
+        // private PropertyEventCallback clearChildren = null;
+        // private object _children_lock = new object();
         [Ignore] public List<SFXCue> children {
             get {
                 lock (_cueItems_lock) {
@@ -168,7 +169,7 @@ namespace SFXPlayer.Cues {
                     return _result;
                 }
 
-                lock (_CueGroup_lock) {
+                /*lock (_CueGroup_lock) {
                     if (clearChildren == null) clearChildren = delegate (string prop, object nValue) {
                         lock (_children_lock) {
                             _children = null;
@@ -189,7 +190,7 @@ namespace SFXPlayer.Cues {
                             return _children;
                         }
                     }
-                }
+                }*/
             }
         }
 

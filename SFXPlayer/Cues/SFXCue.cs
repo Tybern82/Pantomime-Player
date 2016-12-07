@@ -231,6 +231,15 @@ namespace SFXPlayer.Cues {
         }
 
         /**
+         * Actual playable length of this cue, incorporating the fade out effects.
+         */
+         public virtual TimeSpan PlayLength {
+            get {
+                return ((hasAutoFade ? AutoFadeOutAt + FadeOutDuration : Length) - SeekTo);
+            }
+        }
+
+        /**
          * Used to retrieve a prepared SoundFX element ready for playing. This will retrieve the current data if one is already
          * in progress/prepared, or create a new effect element if one is not present. Using this element allows the player to
          * lazy-load the required effects as necessary. Since the source only represents the current playing state of the cue,
