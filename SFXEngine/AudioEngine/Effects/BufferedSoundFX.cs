@@ -132,7 +132,7 @@ namespace SFXEngine.AudioEngine.Effects {
         public override Boolean seekTo(TimeSpan index) {
             if ((canSeek) && (source is SoundFX)) {
                 lock (mainBuffer_lock) {
-                    lock (secondaryBuffer) {
+                    lock (secondaryBuffer_lock) {
                         bool _result = ((SoundFX)source).seekTo(index);
                         if (_result) {
                             onSeek.triggerEvent(this);
@@ -152,7 +152,7 @@ namespace SFXEngine.AudioEngine.Effects {
         public override Boolean seekTo(Int64 sampleIndex) {
             if ((canSeek) && (source is SoundFX)) {
                 lock (mainBuffer_lock) {
-                    lock (secondaryBuffer) {
+                    lock (secondaryBuffer_lock) {
                         bool _result = ((SoundFX)source).seekTo(sampleIndex);
                         if (_result) {
                             onSeek.triggerEvent(this);

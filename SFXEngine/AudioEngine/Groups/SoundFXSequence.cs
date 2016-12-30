@@ -141,6 +141,7 @@ namespace SFXEngine.AudioEngine.Groups {
                 samplesRead += currRead;    // update the number of produced samples
                 if (currRead == 0) currentFX++; // move to the next source if we have exhausted this one
             }
+            position += samplesRead;
             return samplesRead; // return the number of samples successfully read
         }
     }

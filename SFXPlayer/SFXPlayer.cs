@@ -78,11 +78,13 @@ namespace SFXPlayer {
 
         public void onBeginPreshow() {
             gui.actionStatusText = "Preshow Audience Warnings...";
+            SoundFX call5 = currentShow.Announcements.PreshowEntry_5;
+            call5.Volume = 3.0;
             SoundFXSequence seq = new SoundFXSequence(AudioPlaybackEngine.Instance.WaveFormat, new SoundFX[] {
                 currentShow.Announcements.PreshowEntry_10,
                 // SFXUtilities.GenerateSilence(10),
                 SFXUtilities.GenerateSilence(TS_5Minutes),
-                currentShow.Announcements.PreshowEntry_5,
+                call5,
                 // SFXUtilities.GenerateSilence(10),
                 SFXUtilities.GenerateSilence(TS_5Minutes)
             });
@@ -162,10 +164,14 @@ namespace SFXPlayer {
 
         public void onBeginInterval(IntervalTime iTime) {
             gui.actionStatusText = "Interval...";
+            SoundFX warnMessage = currentShow.Announcements.Interval_5MinuteWarning;
+            warnMessage.Volume = 3.0;
             SoundFX fx = new SoundFXSequence(AudioPlaybackEngine.Instance.WaveFormat, new SoundFX[] {
                 currentShow.Announcements.BeginInterval(iTime),
+                // SFXUtilities.GenerateSilence(5),
                 SFXUtilities.GenerateSilence((int)iTime-5, 0),
-                currentShow.Announcements.Interval_5MinuteWarning,
+                warnMessage,
+                // SFXUtilities.GenerateSilence(5)
                 SFXUtilities.GenerateSilence(TS_5Minutes)
             });
             fx.onSample.addEventTrigger(updateStatusTimer);

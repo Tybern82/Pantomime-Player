@@ -29,7 +29,7 @@ namespace SFXEngine.AudioEngine {
 
         public TimeSpan length { get; protected set; } = TimeSpan.Zero; // a '0' length is taken to be unknown, rather than empty
 
-        public virtual TimeSpan playLengthRemaining {
+        public TimeSpan playLengthRemaining {
             get {
                 return ((hasAutoFade ? AutoFadeOutAt + FadeOutDuration : length) - currentTime);
             }
